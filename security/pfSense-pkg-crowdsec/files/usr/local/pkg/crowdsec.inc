@@ -212,7 +212,7 @@ function crowdsec_generate_rules($type)
                 $tag = !empty($cf['block_v4_tag']) ? "tag " . $cf['block_v4_tag'] : '';
 
                 $rules .= ' ' . $direction . ' ' . $log .
-                          ' quick inet from <crowdsec_blacklists> to any label "Crowdsec IPv4"';
+                          ' quick inet from <crowdsec_blacklists> to any label "CrowdSec IPv4"';
                 if (!empty($tag)) {
                     $rules .= ' ' . $tag;
                 }
@@ -226,7 +226,7 @@ function crowdsec_generate_rules($type)
                 $tag = !empty($cf['block_v6_tag']) ? "tag " . $cf['block_v6_tag'] : '';
 
                 $rules .= ' ' . $direction . ' ' . $log .
-                          ' quick inet6 from <crowdsec6_blacklists> to any label "Crowdsec IPv6"';
+                          ' quick inet6 from <crowdsec6_blacklists> to any label "CrowdSec IPv6"';
                 if (!empty($tag)) {
                     $rules .= ' ' . $tag;
                 }
