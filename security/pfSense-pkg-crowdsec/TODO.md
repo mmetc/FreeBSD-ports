@@ -1,3 +1,55 @@
+Enable log processor -> enabled?
+       service crowdsec enabled
+       service crowdsec start
+
+       disabled?
+       service crowdsec stop
+       service crowdsec disabled
+
+Enable firewall bouncer -> enabled?
+       service_firewall crowdsec enabled
+       service_firewall crowdsec start
+
+       disabled?
+       service_firewall crowdsec stop
+       service_firewall crowdsec disabled
+
+
+
+when the form is saved
+
+ set /usr/local/etc/crowdsec/local_api_credentials.yaml:url 
+ set /usr/local/etc/crowdsec/config.yaml:api.server.listen_uri
+ set /usr/local/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml:api_url
+
+
+metrics port: 6060 by default, sets config.yaml:prometheus.listen_port
+
+
+
+General settings: we can split in 
+
+  Log processor (Crowdsec Agent)
+    enable log processor
+    metrics port  6060
+    log level for crowdsec.log:  debug/info/warning
+
+  Remediation component
+    enable firewall bouncer
+    log level for crowdsec-firewall-bouncer.log: debug/info/warning
+
+  Security Engine (LAPI)
+    LAPI port
+    LAPI host
+
+    LAPI is remote [x]
+      Agent user
+      Agent password
+      Firewall bouncer API api_key
+
+
+---------------------------
+
 Replace "cp -r ./" by "${COPYTREE_SHARE} ." in Makefile ()
 
 
