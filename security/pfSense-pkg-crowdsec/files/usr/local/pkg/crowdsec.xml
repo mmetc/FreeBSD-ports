@@ -25,11 +25,11 @@
  */
 	]]>
     </copyright>
-    <name>Crowdsec</name>
+    <name>CrowdSec</name>
     <title>Security/Crowdsec</title>
     <include_file>/usr/local/pkg/crowdsec.inc</include_file>
     <menu>
-        <name>Crowdsec</name>
+        <name>CrowdSec</name>
         <section>Services</section>
         <url>/crowdsec_landing.php</url>
     </menu>
@@ -216,12 +216,16 @@
         ]]>
     </custom_php_validation_command>
 
+    <custom_php_pre_deinstall_command>
+        <![CDATA[
+		crowdsec_deinstall();
+		]]>
+    </custom_php_pre_deinstall_command>
+
     <filter_rules_needed><![CDATA[crowdsec_generate_rules]]></filter_rules_needed>
 
     <!--
     <custom_php_global_functions></custom_php_global_functions>
-    <custom_php_install_command></custom_php_install_command>
-    <custom_php_pre_deinstall_command></custom_php_pre_deinstall_command>
     <custom_php_deinstall_command></custom_php_deinstall_command>
     <custom_add_php_command></custom_add_php_command>
     <custom_add_php_command_late></custom_add_php_command_late>

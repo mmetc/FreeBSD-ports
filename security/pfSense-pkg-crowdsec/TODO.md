@@ -1,6 +1,6 @@
- - remove the alias and rules when the plugin is uninstalled
+ - remove the alias and rules when the plugin is uninstalled => Done
  - possibly validation of tags or free-style strings in user settings
- - crowdsec -> CrowdSec
+ - crowdsec -> CrowdSec => Done
 
 
 

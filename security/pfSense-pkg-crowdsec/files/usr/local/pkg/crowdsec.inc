@@ -25,7 +25,28 @@ require_once("config.lib.inc");
 require_once("filter.inc");
 require_once("/usr/local/pkg/crowdsec/vendor/autoload.php");
 
+use Symfony\Component\Yaml\Yaml;
+
 $g['disablehelpicon'] = true;
+
+global $crowdsec_aliases;
+$crowdsec_aliases = array(
+    array(
+        'name' => 'crowdsec_blacklists',
+        'address' => "",
+        'descr' => 'Crowdsec blacklists IPv4 (DO NOT EDIT)',
+        'type' => 'host',
+        'detail' => ''
+    ),
+    array(
+        'name' => 'crowdsec6_blacklists',
+        'address' => "",
+        'descr' => 'Crowdsec blacklists IPv6 (DO NOT EDIT)',
+        'type' => 'host',
+        'detail' => ''
+    ),
+
+);
 
 function crowdsec_validate_form($post, &$input_errors)
 {
@@ -56,28 +77,49 @@ function crowdsec_install()
     filter_configure();
 }
 
+/**
+ * Find aliases array index
+ * @param $name
+ * @return int|string
+ */
+function get_alias_index($name){
+    config_init_path(implode('/', ['aliases']));
+    foreach (config_get_path('aliases/alias', []) as $idx => $alias) {
+        if ($alias['name'] == $name ){
+            return $idx;
+        }
+    }
+
+    return -1;
+}
+
+function crowdsec_deinstall()
+{
+    // Delete aliases
+    global $crowdsec_aliases;
+    $delete_flag = false;
+    parse_config(true);
+    foreach ($crowdsec_aliases as $crowdsec_alias){
+        $crowdsec_index = get_alias_index($crowdsec_alias['name']);
+        if($crowdsec_index !== -1){
+            config_del_path("aliases/alias/{$crowdsec_index}");
+            $delete_flag = true;
+        }
+    }
+    if($delete_flag){
+        write_config('pfsense_crowdsec: deleting alias');
+    }
+    // Delete rules
+    crowdsec_generate_rules('deinstall');
+    filter_configure();
+}
+
 function crowdsec_sync_config()
 {
     #########################################
     #	UPDATE pfSense ALIAS TABLES	#
     #########################################
-    $crowdsec_aliases = array(
-        array(
-            'name' => 'crowdsec_blacklists',
-            'address' => "",
-            'descr' => 'Crowdsec blacklists IPv4 (DO NOT EDIT)',
-            'type' => 'host',
-            'detail' => ''
-        ),
-        array(
-            'name' => 'crowdsec6_blacklists',
-            'address' => "",
-            'descr' => 'Crowdsec blacklists IPv6 (DO NOT EDIT)',
-            'type' => 'host',
-            'detail' => ''
-        ),
-
-    );
+    global $crowdsec_aliases;
     parse_config(true);
     config_init_path(implode('/', ['aliases']));
     $exist_aliases = config_get_path('aliases/alias', []);
@@ -136,6 +178,8 @@ function crowdsec_generate_rules($type)
                 }
                 $rules .= "\n";
             }
+            break;
+        default:
             break;
     }
 
