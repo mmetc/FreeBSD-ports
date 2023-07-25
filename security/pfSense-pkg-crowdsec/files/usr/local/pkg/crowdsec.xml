@@ -204,11 +204,12 @@
 		crowdsec_install();
 		]]>
     </custom_php_install_command>
-    <custom_php_resync_config_command>
+
+    <custom_add_php_command_late>
         <![CDATA[
-		crowdsec_sync_config();
+		crowdsec_add_command_late();
 		]]>
-    </custom_php_resync_config_command>
+    </custom_add_php_command_late>
 
     <custom_php_validation_command>
         <![CDATA[
@@ -227,13 +228,11 @@
     <!--
     <custom_php_global_functions></custom_php_global_functions>
     <custom_php_deinstall_command></custom_php_deinstall_command>
-    <custom_add_php_command></custom_add_php_command>
-    <custom_add_php_command_late></custom_add_php_command_late>
+    <custom_add_php_command></custom_add_php_command><custom_php_resync_config_command>
+    </custom_php_resync_config_command>
     <custom_delete_php_command></custom_delete_php_command>
-    <custom_php_resync_config_command></custom_php_resync_config_command>
     <start_command></start_command>
     <custom_php_service_status_command></custom_php_service_status_command>
-    <custom_php_validation_command></custom_php_validation_command>
     <custom_php_after_head_command></custom_php_after_head_command>
     <custom_php_command_before_form></custom_php_command_before_form>
     <custom_php_after_form_command></custom_php_after_form_command>

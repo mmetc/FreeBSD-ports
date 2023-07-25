@@ -73,6 +73,29 @@ function crowdsec_validate_form($post, &$input_errors)
 
 function crowdsec_install()
 {
+    // UPDATE pfSense ALIAS TABLES
+    global $crowdsec_aliases;
+    parse_config(true);
+    config_init_path(implode('/', ['aliases']));
+    $exist_aliases = config_get_path('aliases/alias', []);
+
+    $exist_aliases_names = array_column($exist_aliases, 'name');
+
+    $final_aliases = $exist_aliases;
+
+    // Add Crowdsec alias if not exist
+    foreach ($crowdsec_aliases as $crowdsec_alias) {
+        if (!in_array($crowdsec_alias['name'], $exist_aliases_names)) {
+            $final_aliases[] = $crowdsec_alias;
+        }
+    }
+    // Update config.xml, if changes required
+    if ($exist_aliases !== $final_aliases) {
+        config_set_path('aliases/alias', $final_aliases);
+        write_config('pfsense_crowdsec: saving Aliases');
+    }
+    unset($final_aliases, $exist_aliases);
+    // Update rules
     crowdsec_generate_rules('filter');
     filter_configure();
 }
@@ -107,43 +130,26 @@ function crowdsec_deinstall()
         }
     }
     if($delete_flag){
-        write_config('pfsense_crowdsec: deleting alias');
+        write_config('pfsense_crowdsec: deleting aliases');
     }
     // Delete rules
     crowdsec_generate_rules('deinstall');
     filter_configure();
 }
 
-function crowdsec_sync_config()
+function crowdsec_add_command_late()
 {
-    #########################################
-    #	UPDATE pfSense ALIAS TABLES	#
-    #########################################
-    global $crowdsec_aliases;
-    parse_config(true);
-    config_init_path(implode('/', ['aliases']));
-    $exist_aliases = config_get_path('aliases/alias', []);
-
-    $exist_aliases_names = array_column($exist_aliases, 'name');
-
-    $final_aliases = $exist_aliases;
-
-    // Add Crowdsec alias if not exist
-    foreach ($crowdsec_aliases as $crowdsec_alias) {
-        if (!in_array($crowdsec_alias['name'], $exist_aliases_names)) {
-            $final_aliases[] = $crowdsec_alias;
-        }
-    }
-    // Update config.xml, if changes required
-    if ($exist_aliases !== $final_aliases) {
-        config_set_path('aliases/alias', $final_aliases);
-        write_config('pfsense_crowdsec: saving Aliases');
-    }
-    unset($final_aliases, $exist_aliases);
     // Generate rules depending on settings
     crowdsec_generate_rules('filter');
-    // Reload filter
-    filter_configure();
+    // Reload filter id done after the custom_add_php_command_late hook
+
+
+
+
+
+
+    /*$value = Yaml::parse(file_get_contents('/usr/local/etc/crowdsec/local_api_credentials.yaml'));
+    syslog(LOG_WARNING, print_r($value));*/
 }
 
 function crowdsec_generate_rules($type)
@@ -181,6 +187,10 @@ function crowdsec_generate_rules($type)
             break;
         default:
             break;
+    }
+
+    if(!empty($rules)){
+        syslog(LOG_INFO, "CrowdSec rules:\n $rules");
     }
 
     return $rules;
