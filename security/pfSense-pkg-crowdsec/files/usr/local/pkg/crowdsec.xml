@@ -205,12 +205,6 @@
 		]]>
     </custom_php_install_command>
 
-    <custom_add_php_command_late>
-        <![CDATA[
-		crowdsec_add_command_late();
-		]]>
-    </custom_add_php_command_late>
-
     <custom_php_resync_config_command>
         <![CDATA[
 		crowdsec_resync_config();
@@ -232,6 +226,7 @@
     <filter_rules_needed><![CDATA[crowdsec_generate_rules]]></filter_rules_needed>
 
     <!--
+    <custom_add_php_command_late></custom_add_php_command_late>
     <custom_php_global_functions></custom_php_global_functions>
     <custom_php_deinstall_command></custom_php_deinstall_command>
     <custom_add_php_command></custom_add_php_command>

@@ -159,19 +159,6 @@ function crowdsec_deinstall()
 }
 
 /**
- * custom_add_php_command_late hook (setting edition)
- * @see src/usr/local/www/pkg_edit.php
- *
- * @return void
- */
-function crowdsec_add_command_late()
-{
-    // Generate rules depending on settings
-    // Reload filter is not needed here because done after the custom_add_php_command_late hook
-    crowdsec_generate_rules('filter');
-}
-
-/**
  * custom_php_resync_config_command hook (install, setting edition, ...)
  *
  * @return void
