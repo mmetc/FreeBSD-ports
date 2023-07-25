@@ -1,3 +1,7 @@
+Replace "cp -r ./" by "${COPYTREE_SHARE} ." in Makefile ()
+
+
+
  - remove the alias and rules when the plugin is uninstalled => Done
  - possibly validation of tags or free-style strings in user settings
  - crowdsec -> CrowdSec => Done
