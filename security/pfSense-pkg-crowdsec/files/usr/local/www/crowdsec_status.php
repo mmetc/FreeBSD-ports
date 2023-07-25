@@ -25,7 +25,7 @@ require_once("globals.inc");
 
 $g['disablehelpicon'] = true;
 
-$pgtitle = array(gettext("Security"), gettext("Crowdsec"), gettext("Status"));
+$pgtitle = array(gettext("Security"), gettext("CrowdSec"), gettext("Status"));
 $pglinks = ['@self', '@self', '@self'];
 $shortcut_section = "crowdsec";
 

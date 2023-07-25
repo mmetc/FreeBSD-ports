@@ -25,11 +25,11 @@
  */
 	]]>
     </copyright>
-    <name>Crowdsec</name>
-    <title>Security/Crowdsec</title>
+    <name>CrowdSec</name>
+    <title>Security/CrowdSec</title>
     <include_file>/usr/local/pkg/crowdsec.inc</include_file>
     <menu>
-        <name>Crowdsec</name>
+        <name>CrowdSec</name>
         <section>Services</section>
         <url>/crowdsec_landing.php</url>
     </menu>
@@ -115,17 +115,17 @@
         </field>
         <!-- Crowdsec IPv4 blocklist settings -->
         <field>
-            <name>Crowdsec IPv4 blocklist rule settings</name>
+            <name>CrowdSec IPv4 blocklist rule settings</name>
             <type>listtopic</type>
         </field>
         <field>
             <fielddescr>Description</fielddescr>
             <fieldname>block_v4_info</fieldname>
             <type>info</type>
-            <description><![CDATA[Add a pfctl rule: <i>block drop {direction} {log} quick inet from crowdsec_blacklists to any label "Crowdsec IPv4" tag {tag}</i>]]></description>
+            <description><![CDATA[Add a pfctl rule: <i>block drop {direction} {log} quick inet from crowdsec_blacklists to any label "CrowdSec IPv4" tag {tag}</i>]]></description>
         </field>
         <field>
-            <fielddescr>Enable Crowdsec IPv4 blocklist rule</fielddescr>
+            <fielddescr>Enable CrowdSec IPv4 blocklist rule</fielddescr>
             <fieldname>enable_block_v4</fieldname>
             <type>checkbox</type>
             <enablefields>block_v4_direction,block_v4_log,block_v4_tag</enablefields>
@@ -157,17 +157,17 @@
         </field>
         <!-- Crowdsec IPv6 blocklist settings -->
         <field>
-            <name>Crowdsec IPv6 blocklist rule settings</name>
+            <name>CrowdSec IPv6 blocklist rule settings</name>
             <type>listtopic</type>
         </field>
         <field>
             <fielddescr>Description</fielddescr>
             <fieldname>block_v6_info</fieldname>
             <type>info</type>
-            <description><![CDATA[Add a pfctl rule: <i>block drop {direction} {log} quick inet6 from crowdsec6_blacklists to any label "Crowdsec IPv6" tag {tag}</i>]]></description>
+            <description><![CDATA[Add a pfctl rule: <i>block drop {direction} {log} quick inet6 from crowdsec6_blacklists to any label "CrowdSec IPv6" tag {tag}</i>]]></description>
         </field>
         <field>
-            <fielddescr>Enable Crowdsec IPv6 blocklist rule</fielddescr>
+            <fielddescr>Enable CrowdSec IPv6 blocklist rule</fielddescr>
             <fieldname>enable_block_v6</fieldname>
             <type>checkbox</type>
             <enablefields>block_v6_direction,block_v6_log,block_v6_tag</enablefields>
@@ -204,9 +204,10 @@
 		crowdsec_install();
 		]]>
     </custom_php_install_command>
+
     <custom_php_resync_config_command>
         <![CDATA[
-		crowdsec_sync_config();
+		crowdsec_resync_config();
 		]]>
     </custom_php_resync_config_command>
 
@@ -216,20 +217,22 @@
         ]]>
     </custom_php_validation_command>
 
+    <custom_php_pre_deinstall_command>
+        <![CDATA[
+		crowdsec_deinstall();
+		]]>
+    </custom_php_pre_deinstall_command>
+
     <filter_rules_needed><![CDATA[crowdsec_generate_rules]]></filter_rules_needed>
 
     <!--
+    <custom_add_php_command_late></custom_add_php_command_late>
     <custom_php_global_functions></custom_php_global_functions>
-    <custom_php_install_command></custom_php_install_command>
-    <custom_php_pre_deinstall_command></custom_php_pre_deinstall_command>
     <custom_php_deinstall_command></custom_php_deinstall_command>
     <custom_add_php_command></custom_add_php_command>
-    <custom_add_php_command_late></custom_add_php_command_late>
     <custom_delete_php_command></custom_delete_php_command>
-    <custom_php_resync_config_command></custom_php_resync_config_command>
     <start_command></start_command>
     <custom_php_service_status_command></custom_php_service_status_command>
-    <custom_php_validation_command></custom_php_validation_command>
     <custom_php_after_head_command></custom_php_after_head_command>
     <custom_php_command_before_form></custom_php_command_before_form>
     <custom_php_after_form_command></custom_php_after_form_command>

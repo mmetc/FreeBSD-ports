@@ -14,6 +14,7 @@ www/crowdsec_status.php
 
 @dir pkg/crowdsec
 pkg/crowdsec/composer.json
+pkg/crowdsec/composer.lock
 @dir pkg/crowdsec/vendor
 @dir pkg/crowdsec/vendor/symfony
 @dir pkg/crowdsec/vendor/symfony/yaml
@@ -69,4 +70,3 @@ pkg/crowdsec/vendor/composer/autoload_real.php
 pkg/crowdsec/vendor/composer/autoload_namespaces.php
 pkg/crowdsec/vendor/composer/autoload_classmap.php
 pkg/crowdsec/vendor/composer/autoload_psr4.php
-pkg/crowdsec/composer.lock

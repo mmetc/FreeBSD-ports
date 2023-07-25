@@ -25,8 +25,40 @@ require_once("config.lib.inc");
 require_once("filter.inc");
 require_once("/usr/local/pkg/crowdsec/vendor/autoload.php");
 
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Exception\DumpException;
+
+define("CROWDSEC_LAPI_CONF", '/usr/local/etc/crowdsec/local_api_credentials.yaml');
+
 $g['disablehelpicon'] = true;
 
+global $crowdsec_aliases;
+$crowdsec_aliases = array(
+    array(
+        'name' => 'crowdsec_blacklists',
+        'address' => "",
+        'descr' => 'Crowdsec blacklists IPv4 (DO NOT EDIT)',
+        'type' => 'host',
+        'detail' => ''
+    ),
+    array(
+        'name' => 'crowdsec6_blacklists',
+        'address' => "",
+        'descr' => 'Crowdsec blacklists IPv6 (DO NOT EDIT)',
+        'type' => 'host',
+        'detail' => ''
+    ),
+
+);
+
+/**
+ * custom_php_validation_command hook (setting edition)
+ *
+ * @param $post
+ * @param $input_errors
+ * @return void
+ */
 function crowdsec_validate_form($post, &$input_errors)
 {
     if (!empty($post['lapi_port'])) {
@@ -35,7 +67,6 @@ function crowdsec_validate_form($post, &$input_errors)
             $input_errors[] = 'LAPI port must be a numeric value.';
         }
     }
-
     // Use external LAPI
     if (!empty($post['lapi_is_remote'])) {
         if (empty($post['agent_user'])) {
@@ -50,34 +81,15 @@ function crowdsec_validate_form($post, &$input_errors)
     }
 }
 
+/**
+ * custom_php_install_command hook (package installation)
+ *
+ * @return void
+ */
 function crowdsec_install()
 {
-    crowdsec_generate_rules('filter');
-    filter_configure();
-}
-
-function crowdsec_sync_config()
-{
-    #########################################
-    #	UPDATE pfSense ALIAS TABLES	#
-    #########################################
-    $crowdsec_aliases = array(
-        array(
-            'name' => 'crowdsec_blacklists',
-            'address' => "",
-            'descr' => 'Crowdsec blacklists IPv4 (DO NOT EDIT)',
-            'type' => 'host',
-            'detail' => ''
-        ),
-        array(
-            'name' => 'crowdsec6_blacklists',
-            'address' => "",
-            'descr' => 'Crowdsec blacklists IPv6 (DO NOT EDIT)',
-            'type' => 'host',
-            'detail' => ''
-        ),
-
-    );
+    // UPDATE pfSense ALIAS TABLES
+    global $crowdsec_aliases;
     parse_config(true);
     config_init_path(implode('/', ['aliases']));
     $exist_aliases = config_get_path('aliases/alias', []);
@@ -98,12 +110,92 @@ function crowdsec_sync_config()
         write_config('pfsense_crowdsec: saving Aliases');
     }
     unset($final_aliases, $exist_aliases);
-    // Generate rules depending on settings
+    // Update rules
     crowdsec_generate_rules('filter');
-    // Reload filter
     filter_configure();
 }
 
+/**
+ * Find aliases array index
+ * @param $name
+ * @return int|string
+ */
+function get_alias_index($name)
+{
+    config_init_path(implode('/', ['aliases']));
+    foreach (config_get_path('aliases/alias', []) as $idx => $alias) {
+        if ($alias['name'] == $name) {
+            return $idx;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * custom_php_pre_deinstall_command hook (package deinstallation)
+ *
+ * @return void
+ */
+function crowdsec_deinstall()
+{
+    // Delete aliases
+    global $crowdsec_aliases;
+    $delete_flag = false;
+    parse_config(true);
+    foreach ($crowdsec_aliases as $crowdsec_alias) {
+        $crowdsec_index = get_alias_index($crowdsec_alias['name']);
+        if ($crowdsec_index !== -1) {
+            config_del_path("aliases/alias/{$crowdsec_index}");
+            $delete_flag = true;
+        }
+    }
+    if ($delete_flag) {
+        write_config('pfsense_crowdsec: deleting aliases');
+    }
+    // Delete rules
+    crowdsec_generate_rules('deinstall');
+    filter_configure();
+}
+
+/**
+ * custom_php_resync_config_command hook (install, setting edition, ...)
+ *
+ * @return void
+ */
+function crowdsec_resync_config()
+{
+    global $config;
+    $cf = $config['installedpackages']['crowdsec']['config'][0] ?? array();
+    $lapi_conf = [];
+    // Update local_api_credentials.yaml
+    try {
+        $lapi_conf = Yaml::parse(file_get_contents(CROWDSEC_LAPI_CONF));
+    } catch (ParseException $exception) {
+        syslog(LOG_ERR, 'Unable to parse the local_api_credentials.yaml: ' . $exception->getMessage());
+    }
+    if (!empty($cf['lapi_port']) && !empty($cf['lapi_host'])) {
+        $lapi_url = $lapi_conf['url'] ?? '';
+        $candidate_url = 'http://' . $cf['lapi_host'] . ':' . $cf['lapi_port'];
+        if ($candidate_url !== $lapi_url) {
+            $lapi_conf['url'] = $candidate_url;
+            try {
+                $yaml = Yaml::dump($lapi_conf);
+                file_put_contents(CROWDSEC_LAPI_CONF, $yaml);
+                // @TODO restart crowdsec service ?
+            } catch (DumpException $exception) {
+                syslog(LOG_ERR, 'Unable to dump the local_api_credentials.yaml: ' . $exception->getMessage());
+            }
+        }
+    }
+}
+
+/**
+ * filter_rules_needed hook (install, setting edition, ...)
+ *
+ * @param $type
+ * @return string
+ */
 function crowdsec_generate_rules($type)
 {
     $rules = "";
@@ -112,31 +204,41 @@ function crowdsec_generate_rules($type)
             global $config;
             $cf = $config['installedpackages']['crowdsec']['config'][0] ?? array();
 
-            if(!empty($cf['enable_block_v4'])){
+            if (!empty($cf['enable_block_v4'])) {
                 $rules .= "block drop";
-                $direction = !empty($cf['block_v4_direction']) && $cf['block_v4_direction'] !== 'any'? $cf['block_v4_direction'] : '';
+                $direction = !empty($cf['block_v4_direction']) && $cf['block_v4_direction'] !== 'any' ?
+                    $cf['block_v4_direction'] : '';
                 $log = !empty($cf['block_v4_log']) ? "log" : '';
-                $tag = !empty($cf['block_v4_tag']) ? "tag ". $cf['block_v4_tag'] : '';
+                $tag = !empty($cf['block_v4_tag']) ? "tag " . $cf['block_v4_tag'] : '';
 
-                $rules .= ' ' . $direction . ' ' . $log . ' quick inet from <crowdsec_blacklists> to any label "Crowdsec IPv4"';
-                if(!empty($tag)){
-                    $rules .= ' '. $tag;
+                $rules .= ' ' . $direction . ' ' . $log .
+                          ' quick inet from <crowdsec_blacklists> to any label "CrowdSec IPv4"';
+                if (!empty($tag)) {
+                    $rules .= ' ' . $tag;
                 }
                 $rules .= "\n";
             }
-            if(!empty($cf['enable_block_v6'])){
+            if (!empty($cf['enable_block_v6'])) {
                 $rules .= "block drop";
-                $direction = !empty($cf['block_v6_direction']) && $cf['block_v6_direction'] !== 'any'? $cf['block_v6_direction'] : '';
+                $direction = !empty($cf['block_v6_direction']) && $cf['block_v6_direction'] !== 'any' ?
+                    $cf['block_v6_direction'] : '';
                 $log = !empty($cf['block_v6_log']) ? "log" : '';
-                $tag = !empty($cf['block_v6_tag']) ? "tag ". $cf['block_v6_tag'] : '';
+                $tag = !empty($cf['block_v6_tag']) ? "tag " . $cf['block_v6_tag'] : '';
 
-                $rules .= ' ' . $direction . ' ' . $log  .' quick inet6 from <crowdsec6_blacklists> to any label "Crowdsec IPv6"';
-                if(!empty($tag)){
-                    $rules .= ' '. $tag;
+                $rules .= ' ' . $direction . ' ' . $log .
+                          ' quick inet6 from <crowdsec6_blacklists> to any label "CrowdSec IPv6"';
+                if (!empty($tag)) {
+                    $rules .= ' ' . $tag;
                 }
                 $rules .= "\n";
             }
             break;
+        default:
+            break;
+    }
+
+    if (!empty($rules)) {
+        syslog(LOG_INFO, "CrowdSec rules:\n $rules");
     }
 
     return $rules;
