@@ -38,7 +38,8 @@ extra_commands="configtest"
 
 crowdsec_firewall_precmd() {
     CSCLI=%%PREFIX%%/bin/cscli
-    orig_line="api_key: \${API_KEY}"
+    # there might be quotes
+    orig_line="api_key: .*\${API_KEY}.*"
     # IF the bouncer is not configured
     if grep -q "^${orig_line}" "${crowdsec_firewall_config}"; then
         BOUNCER="cs-firewall-bouncer-$(date +%s)"

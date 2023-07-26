@@ -38,7 +38,8 @@ extra_commands="configtest"
 
 crowdsec_mirror_precmd() {
     CSCLI=%%PREFIX%%/bin/cscli
-    orig_line="lapi_key: \${API_KEY}"
+    # there might be quotes
+    orig_line="lapi_key: .*\${API_KEY}.*"
     # IF the bouncer is not configured
     if grep -q "${orig_line}" "${crowdsec_mirror_config}"; then
         BOUNCER="cs-blocklist-mirror-$(date +%s)"
