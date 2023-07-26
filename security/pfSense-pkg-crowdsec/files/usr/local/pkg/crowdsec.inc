@@ -90,38 +90,6 @@ function crowdsec_validate_form($post, &$input_errors)
 }
 
 /**
- * custom_add_php_command (setting edition, after validation and before saving)
- *
- * @return void
- */
-function crowdsec_add_command()
-{
-    parse_config(true);
-    $initial_agent_status = config_get_path('installedpackages/crowdsec/config/0/enable_agent', 'off');
-    $new_agent_status = isset($_POST['enable_agent']) ? $_POST['enable_agent'] : 'off';
-    if($new_agent_status === 'on' && $initial_agent_status !== 'on'){
-        exec('service crowdsec enable', $output);
-        syslog(LOG_INFO, 'crowdsec enabled: '. implode("|", array_values($output)));
-    }
-    if($new_agent_status === 'off' && $initial_agent_status !== 'off'){
-        exec('service crowdsec stop && service crowdsec disable', $output);
-        syslog(LOG_INFO, 'crowdsec disabled: '. implode("|", array_values($output)));
-    }
-
-    $initial_firewall_status = config_get_path('installedpackages/crowdsec/config/0/enable_fw_bouncer', 'off');
-    $new_firewall_status = isset($_POST['enable_fw_bouncer']) ? $_POST['enable_fw_bouncer'] : 'off';
-    if($new_firewall_status === 'on' && $initial_firewall_status !== 'on'){
-        exec('service crowdsec_firewall enable', $output);
-        syslog(LOG_INFO, 'crowdsec_firewall enabled: '. implode("|", array_values($output)));
-    }
-
-    if($new_firewall_status === 'off' && $initial_firewall_status !== 'off'){
-        exec('service crowdsec_firewall stop && service crowdsec_firewall disable', $output);
-        syslog(LOG_INFO, 'crowdsec_firewall disabled: '. implode("|", array_values($output)));
-    }
-}
-
-/**
  * custom_php_install_command hook (package installation)
  *
  * @return void
@@ -133,11 +101,8 @@ function crowdsec_install()
     parse_config(true);
     config_init_path(implode('/', ['aliases']));
     $exist_aliases = config_get_path('aliases/alias', []);
-
     $exist_aliases_names = array_column($exist_aliases, 'name');
-
     $final_aliases = $exist_aliases;
-
     // Add Crowdsec alias if not exist
     foreach ($crowdsec_aliases as $crowdsec_alias) {
         if (!in_array($crowdsec_alias['name'], $exist_aliases_names)) {
@@ -206,9 +171,10 @@ function crowdsec_deinstall()
 function crowdsec_resync_config()
 {
     $cf = config_get_path('installedpackages/crowdsec/config/0', []);
-
     // Handle crowdsec service start
     if(!empty($cf['enable_agent'])){
+        // Enable service
+        mwexec('service crowdsec enable');
         // Modify LAPI settings (update local_api_credentials.yaml)
         $lapi_conf = [];
         $update_lapi_flag = false;
@@ -277,12 +243,16 @@ function crowdsec_resync_config()
             }
         }
         // Start service
-        exec('service crowdsec start', $output);
-        syslog(LOG_INFO, 'crowdsec service started: '. implode("|", array_values($output)));
+        mwexec('service crowdsec start');
+    } else {
+        // Disable service
+        mwexec('service crowdsec stop && service crowdsec disable');
     }
 
     // Handle crowdsec_firewall service start
     if(!empty($cf['enable_fw_bouncer'])){
+        // Enable service
+        mwexec('service crowdsec_firewall enable');
         // Modify Firewall bouncer settings (update /usr/local/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml)
         $fw_conf = [];
         $update_fw_flag = false;
@@ -316,8 +286,10 @@ function crowdsec_resync_config()
             }
         }
         // Start service
-        exec('service crowdsec_firewall start', $output);
-        syslog(LOG_INFO, 'crowdsec_firewall service started: '. implode("|", array_values($output)));
+        mwexec('service crowdsec_firewall start');
+    } else {
+        // Disable service
+        mwexec('service crowdsec_firewall stop && service crowdsec_firewall disable');
     }
 }
 

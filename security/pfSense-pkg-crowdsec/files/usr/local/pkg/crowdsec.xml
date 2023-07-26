@@ -273,17 +273,11 @@
 
     <filter_rules_needed><![CDATA[crowdsec_generate_rules]]></filter_rules_needed>
 
-    <custom_add_php_command>
-        <![CDATA[
-		crowdsec_add_command();
-		]]>
-    </custom_add_php_command>
-
     <!--
+    <custom_add_php_command></custom_add_php_command>
     <custom_add_php_command_late></custom_add_php_command_late>
     <custom_php_global_functions></custom_php_global_functions>
     <custom_php_deinstall_command></custom_php_deinstall_command>
-
     <custom_delete_php_command></custom_delete_php_command>
     <start_command></start_command>
     <custom_php_service_status_command></custom_php_service_status_command>
@@ -291,5 +285,4 @@
     <custom_php_command_before_form></custom_php_command_before_form>
     <custom_php_after_form_command></custom_php_after_form_command>
     -->
-
 </packagegui>
