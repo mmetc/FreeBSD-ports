@@ -65,14 +65,6 @@
             <description></description>
         </field>
         <field>
-            <fielddescr>Metrics port</fielddescr>
-            <fieldname>metrics_port</fieldname>
-            <type>input</type>
-            <description>Pick the port for the LAPI endpoint.</description>
-            <default_value>6060</default_value>
-            <required>true</required>
-        </field>
-        <field>
             <fielddescr>Log level</fielddescr>
             <fieldname>agent_log_level</fieldname>
             <description><![CDATA[]]></description>
@@ -85,6 +77,14 @@
             <multiple/><!-- (optional) -->
             <size>3</size><!-- (optional) -->
             <default_value>info</default_value>
+            <required>true</required>
+        </field>
+        <field>
+            <fielddescr>Metrics port</fielddescr>
+            <fieldname>metrics_port</fieldname>
+            <type>input</type>
+            <description></description>
+            <default_value>6060</default_value>
             <required>true</required>
         </field>
 
