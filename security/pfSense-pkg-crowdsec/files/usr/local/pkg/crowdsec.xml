@@ -55,20 +55,68 @@
     </tabs>
     <fields>
         <field>
-            <name>General Settings</name>
+            <name>Log processor (CrowdSec agent)</name>
             <type>listtopic</type>
         </field>
         <field>
-            <fielddescr>Enable log processor (agent)</fielddescr>
+            <fielddescr>Enable</fielddescr>
             <fieldname>enable_agent</fieldname>
             <type>checkbox</type>
             <description></description>
+        </field>
+        <field>
+            <fielddescr>Log level</fielddescr>
+            <fieldname>agent_log_level</fieldname>
+            <description><![CDATA[]]></description>
+            <type>select</type>
+            <options>
+                <option><name>Debug</name><value>debug</value></option>
+                <option><name>Info</name><value>info</value></option>
+                <option><name>Warning</name><value>warning</value></option>
+            </options>
+            <multiple/><!-- (optional) -->
+            <size>3</size><!-- (optional) -->
+            <default_value>info</default_value>
+            <required>true</required>
+        </field>
+        <field>
+            <fielddescr>Metrics port</fielddescr>
+            <fieldname>metrics_port</fieldname>
+            <type>input</type>
+            <description></description>
+            <default_value>6060</default_value>
+            <required>true</required>
+        </field>
+
+        <field>
+            <name>Remediation component</name>
+            <type>listtopic</type>
         </field>
         <field>
             <fielddescr>Enable firewall bouncer</fielddescr>
             <fieldname>enable_fw_bouncer</fieldname>
             <type>checkbox</type>
             <description></description>
+        </field>
+        <field>
+            <fielddescr>Log level</fielddescr>
+            <fieldname>firewall_bouncer_log_level</fieldname>
+            <description><![CDATA[]]></description>
+            <type>select</type>
+            <options>
+                <option><name>Debug</name><value>debug</value></option>
+                <option><name>Info</name><value>info</value></option>
+                <option><name>Warning</name><value>warning</value></option>
+            </options>
+            <multiple/><!-- (optional) -->
+            <size>3</size><!-- (optional) -->
+            <default_value>info</default_value>
+            <required>true</required>
+        </field>
+
+        <field>
+            <name>Security Engine (LAPI)</name>
+            <type>listtopic</type>
         </field>
         <field>
             <fielddescr>LAPI port</fielddescr>
@@ -83,11 +131,11 @@
             <fieldname>lapi_host</fieldname>
             <type>input</type>
             <description>Set the LAPI endpoint host or ip.</description>
-            <default_value>localhost</default_value>
+            <default_value>127.0.0.1</default_value>
             <required>true</required>
         </field>
         <field>
-            <fielddescr>Use an external security engine (LAPI)</fielddescr>
+            <fielddescr>LAPI is remote</fielddescr>
             <fieldname>lapi_is_remote</fieldname>
             <type>checkbox</type>
             <description></description>
@@ -225,11 +273,17 @@
 
     <filter_rules_needed><![CDATA[crowdsec_generate_rules]]></filter_rules_needed>
 
+    <custom_add_php_command>
+        <![CDATA[
+		crowdsec_add_command();
+		]]>
+    </custom_add_php_command>
+
     <!--
     <custom_add_php_command_late></custom_add_php_command_late>
     <custom_php_global_functions></custom_php_global_functions>
     <custom_php_deinstall_command></custom_php_deinstall_command>
-    <custom_add_php_command></custom_add_php_command>
+
     <custom_delete_php_command></custom_delete_php_command>
     <start_command></start_command>
     <custom_php_service_status_command></custom_php_service_status_command>
