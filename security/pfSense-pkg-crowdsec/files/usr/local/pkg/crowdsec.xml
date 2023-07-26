@@ -131,7 +131,7 @@
             <fieldname>lapi_host</fieldname>
             <type>input</type>
             <description>Set the LAPI endpoint host or ip.</description>
-            <default_value>localhost</default_value>
+            <default_value>127.0.0.1</default_value>
             <required>true</required>
         </field>
         <field>
