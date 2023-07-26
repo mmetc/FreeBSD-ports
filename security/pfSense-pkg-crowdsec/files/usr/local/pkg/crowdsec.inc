@@ -118,6 +118,21 @@ function crowdsec_install()
     // Update rules
     crowdsec_generate_rules('filter');
     filter_configure();
+    // Add aliases name in firewall bouncer configuration
+    $fw_conf = [];
+    try {
+        $fw_conf = Yaml::parse(file_get_contents(CROWDSEC_FIREWALL_CONF));
+    } catch (ParseException $exception) {
+        syslog(LOG_ERR, 'Unable to parse '. CROWDSEC_FIREWALL_CONF.': ' . $exception->getMessage());
+    }
+    $fw_conf['blacklists_ipv4'] = $crowdsec_aliases[0]['name'];
+    $fw_conf['blacklists_ipv6'] = $crowdsec_aliases[1]['name'];
+    try {
+        $yaml = Yaml::dump($fw_conf, 4);
+        file_put_contents(CROWDSEC_FIREWALL_CONF, $yaml);
+    } catch (DumpException $exception) {
+        syslog(LOG_ERR, 'Unable to dump '. CROWDSEC_FIREWALL_CONF .': ' . $exception->getMessage());
+    }
 }
 
 /**
