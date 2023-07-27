@@ -74,8 +74,6 @@
                 <option><name>Info</name><value>info</value></option>
                 <option><name>Warning</name><value>warning</value></option>
             </options>
-            <multiple/><!-- (optional) -->
-            <size>3</size><!-- (optional) -->
             <default_value>info</default_value>
             <required>true</required>
         </field>
@@ -108,8 +106,6 @@
                 <option><name>Info</name><value>info</value></option>
                 <option><name>Warning</name><value>warning</value></option>
             </options>
-            <multiple/><!-- (optional) -->
-            <size>3</size><!-- (optional) -->
             <default_value>info</default_value>
             <required>true</required>
         </field>
@@ -188,8 +184,6 @@
                 <option><name>In</name><value>in</value></option>
                 <option><name>Out</name><value>out</value></option>
             </options>
-            <multiple/><!-- (optional) -->
-            <size>3</size><!-- (optional) -->
             <default_value>any</default_value>
         </field>
         <field>
@@ -230,8 +224,6 @@
                 <option><name>In</name><value>in</value></option>
                 <option><name>Out</name><value>out</value></option>
             </options>
-            <multiple/><!-- (optional) -->
-            <size>3</size><!-- (optional) -->
             <default_value>any</default_value>
         </field>
         <field>

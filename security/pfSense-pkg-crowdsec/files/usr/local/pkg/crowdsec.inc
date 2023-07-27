@@ -123,15 +123,17 @@ function crowdsec_install()
     try {
         $fw_conf = Yaml::parse(file_get_contents(CROWDSEC_FIREWALL_CONF));
     } catch (ParseException $exception) {
-        syslog(LOG_ERR, 'Unable to parse '. CROWDSEC_FIREWALL_CONF.': ' . $exception->getMessage());
+        syslog(LOG_ERR, 'Unable to parse ' . CROWDSEC_FIREWALL_CONF . ': ' . $exception->getMessage());
     }
-    $fw_conf['blacklists_ipv4'] = $crowdsec_aliases[0]['name'];
-    $fw_conf['blacklists_ipv6'] = $crowdsec_aliases[1]['name'];
-    try {
-        $yaml = Yaml::dump($fw_conf, 4);
-        file_put_contents(CROWDSEC_FIREWALL_CONF, $yaml);
-    } catch (DumpException $exception) {
-        syslog(LOG_ERR, 'Unable to dump '. CROWDSEC_FIREWALL_CONF .': ' . $exception->getMessage());
+    if (!empty($fw_conf)) {
+        $fw_conf['blacklists_ipv4'] = $crowdsec_aliases[0]['name'];
+        $fw_conf['blacklists_ipv6'] = $crowdsec_aliases[1]['name'];
+        try {
+            $yaml = Yaml::dump($fw_conf, 4);
+            file_put_contents(CROWDSEC_FIREWALL_CONF, $yaml);
+        } catch (DumpException $exception) {
+            syslog(LOG_ERR, 'Unable to dump ' . CROWDSEC_FIREWALL_CONF . ': ' . $exception->getMessage());
+        }
     }
 }
 
@@ -187,7 +189,7 @@ function crowdsec_resync_config()
 {
     $cf = config_get_path('installedpackages/crowdsec/config/0', []);
     // Handle crowdsec service start
-    if(!empty($cf['enable_agent'])){
+    if (!empty($cf['enable_agent'])) {
         // Enable service
         mwexec('service crowdsec enable');
         // Modify LAPI settings (update local_api_credentials.yaml)
@@ -196,65 +198,67 @@ function crowdsec_resync_config()
         try {
             $lapi_conf = Yaml::parse(file_get_contents(CROWDSEC_LAPI_CONF));
         } catch (ParseException $exception) {
-            syslog(LOG_ERR, 'Unable to parse '. CROWDSEC_LAPI_CONF.': ' . $exception->getMessage());
+            syslog(LOG_ERR, 'Unable to parse ' . CROWDSEC_LAPI_CONF . ': ' . $exception->getMessage());
         }
-        if (!empty($cf['lapi_port']) && !empty($cf['lapi_host'])) {
-            $lapi_url = $lapi_conf['url'] ?? '';
-            $candidate_url = 'http://' . $cf['lapi_host'] . ':' . $cf['lapi_port'];
-            if ($candidate_url !== $lapi_url) {
-                $lapi_conf['url'] = $candidate_url;
-                $update_lapi_flag = true;
+        if (!empty($lapi_conf)) {
+            if (!empty($cf['lapi_port']) && !empty($cf['lapi_host'])) {
+                $lapi_url = $lapi_conf['url'] ?? '';
+                $candidate_url = 'http://' . $cf['lapi_host'] . ':' . $cf['lapi_port'];
+                if ($candidate_url !== $lapi_url) {
+                    $lapi_conf['url'] = $candidate_url;
+                    $update_lapi_flag = true;
+                }
+            }
+            if ($update_lapi_flag) {
+                try {
+                    $yaml = Yaml::dump($lapi_conf, 4);
+                    file_put_contents(CROWDSEC_LAPI_CONF, $yaml);
+                } catch (DumpException $exception) {
+                    syslog(LOG_ERR, 'Unable to dump ' . CROWDSEC_LAPI_CONF . ': ' . $exception->getMessage());
+                }
             }
         }
-        if ($update_lapi_flag){
-            try {
-                $yaml = Yaml::dump($lapi_conf, 4);
-                file_put_contents(CROWDSEC_LAPI_CONF, $yaml);
-            } catch (DumpException $exception) {
-                syslog(LOG_ERR, 'Unable to dump '. CROWDSEC_LAPI_CONF .': ' . $exception->getMessage());
-            }
-        }
+
         // Modify AGENT settings (update /usr/local/etc/crowdsec/config.yaml)
         $agent_conf = [];
         $update_agent_flag = false;
         try {
             $agent_conf = Yaml::parse(file_get_contents(CROWDSEC_AGENT_CONF));
         } catch (ParseException $exception) {
-            syslog(LOG_ERR, 'Unable to parse '. CROWDSEC_AGENT_CONF .': ' . $exception->getMessage());
+            syslog(LOG_ERR, 'Unable to parse ' . CROWDSEC_AGENT_CONF . ': ' . $exception->getMessage());
         }
-        if (!empty($cf['lapi_port']) && !empty($cf['lapi_host'])) {
-            $agent_url = $agent_conf['api']['server']['listen_uri'] ?? '';
-            $candidate_url = $cf['lapi_host'] . ':' . $cf['lapi_port'];
-            if ($candidate_url !== $agent_url) {
-                $agent_conf['api']['server']['listen_uri'] = $candidate_url;
-                $update_agent_flag = true;
-
+        if(!empty($agent_conf)){
+            if (!empty($cf['lapi_port']) && !empty($cf['lapi_host'])) {
+                $agent_url = $agent_conf['api']['server']['listen_uri'] ?? '';
+                $candidate_url = $cf['lapi_host'] . ':' . $cf['lapi_port'];
+                if ($candidate_url !== $agent_url) {
+                    $agent_conf['api']['server']['listen_uri'] = $candidate_url;
+                    $update_agent_flag = true;
+                }
             }
-        }
-        if (!empty($cf['agent_log_level'])){
-            $agent_log_level = $agent_conf['common']['log_level'] ?? 'info';
-            $candidate_level = $cf['agent_log_level'];
-            if($candidate_level !== $agent_log_level){
-                $agent_conf['common']['log_level'] = $candidate_level;
-                $update_agent_flag = true;
+            if (!empty($cf['agent_log_level'])) {
+                $agent_log_level = $agent_conf['common']['log_level'] ?? 'info';
+                $candidate_level = $cf['agent_log_level'];
+                if ($candidate_level !== $agent_log_level) {
+                    $agent_conf['common']['log_level'] = $candidate_level;
+                    $update_agent_flag = true;
+                }
             }
-
-        }
-        if (!empty($cf['metrics_port'])){
-            $agent_metrics_port = $agent_conf['prometheus']['listen_port'] ?? 6060;
-            $candidate_port = $cf['metrics_port'];
-            if($candidate_port !== $agent_metrics_port){
-                $agent_conf['prometheus']['listen_port'] = (int)$candidate_port;
-                $update_agent_flag = true;
+            if (!empty($cf['metrics_port'])) {
+                $agent_metrics_port = $agent_conf['prometheus']['listen_port'] ?? 6060;
+                $candidate_port = $cf['metrics_port'];
+                if ($candidate_port !== $agent_metrics_port) {
+                    $agent_conf['prometheus']['listen_port'] = (int)$candidate_port;
+                    $update_agent_flag = true;
+                }
             }
-
-        }
-        if ($update_agent_flag){
-            try {
-                $yaml = Yaml::dump($agent_conf, 4);
-                file_put_contents(CROWDSEC_AGENT_CONF, $yaml);
-            } catch (DumpException $exception) {
-                syslog(LOG_ERR, 'Unable to dump '.CROWDSEC_AGENT_CONF.': ' . $exception->getMessage());
+            if ($update_agent_flag) {
+                try {
+                    $yaml = Yaml::dump($agent_conf, 4);
+                    file_put_contents(CROWDSEC_AGENT_CONF, $yaml);
+                } catch (DumpException $exception) {
+                    syslog(LOG_ERR, 'Unable to dump ' . CROWDSEC_AGENT_CONF . ': ' . $exception->getMessage());
+                }
             }
         }
         // Start service
@@ -265,7 +269,7 @@ function crowdsec_resync_config()
     }
 
     // Handle crowdsec_firewall service start
-    if(!empty($cf['enable_fw_bouncer'])){
+    if (!empty($cf['enable_fw_bouncer'])) {
         // Enable service
         mwexec('service crowdsec_firewall enable');
         // Modify Firewall bouncer settings (update /usr/local/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml)
@@ -274,30 +278,32 @@ function crowdsec_resync_config()
         try {
             $fw_conf = Yaml::parse(file_get_contents(CROWDSEC_FIREWALL_CONF));
         } catch (ParseException $exception) {
-            syslog(LOG_ERR, 'Unable to parse '. CROWDSEC_FIREWALL_CONF.': ' . $exception->getMessage());
+            syslog(LOG_ERR, 'Unable to parse ' . CROWDSEC_FIREWALL_CONF . ': ' . $exception->getMessage());
         }
-        if (!empty($cf['lapi_port']) && !empty($cf['lapi_host'])) {
-            $fw_url = $fw_conf['api_url'] ?? '';
-            $candidate_url = 'http://' . $cf['lapi_host'] . ':' . $cf['lapi_port'] .'/';
-            if ($candidate_url !== $fw_url) {
-                $fw_conf['api_url'] = $candidate_url;
-                $update_fw_flag = true;
+        if(!empty($fw_conf)){
+            if (!empty($cf['lapi_port']) && !empty($cf['lapi_host'])) {
+                $fw_url = $fw_conf['api_url'] ?? '';
+                $candidate_url = 'http://' . $cf['lapi_host'] . ':' . $cf['lapi_port'] . '/';
+                if ($candidate_url !== $fw_url) {
+                    $fw_conf['api_url'] = $candidate_url;
+                    $update_fw_flag = true;
+                }
             }
-        }
-        if (!empty($cf['firewall_bouncer_log_level'])) {
-            $fw_log_level = $fw_conf['log_level'] ?? '';
-            $candidate_level = $cf['firewall_bouncer_log_level'];
-            if ($candidate_level !== $fw_log_level) {
-                $fw_conf['log_level'] = $candidate_level;
-                $update_fw_flag = true;
+            if (!empty($cf['firewall_bouncer_log_level'])) {
+                $fw_log_level = $fw_conf['log_level'] ?? '';
+                $candidate_level = $cf['firewall_bouncer_log_level'];
+                if ($candidate_level !== $fw_log_level) {
+                    $fw_conf['log_level'] = $candidate_level;
+                    $update_fw_flag = true;
+                }
             }
-        }
-        if ($update_fw_flag){
-            try {
-                $yaml = Yaml::dump($fw_conf, 4);
-                file_put_contents(CROWDSEC_FIREWALL_CONF, $yaml);
-            } catch (DumpException $exception) {
-                syslog(LOG_ERR, 'Unable to dump '. CROWDSEC_FIREWALL_CONF .': ' . $exception->getMessage());
+            if ($update_fw_flag) {
+                try {
+                    $yaml = Yaml::dump($fw_conf, 4);
+                    file_put_contents(CROWDSEC_FIREWALL_CONF, $yaml);
+                } catch (DumpException $exception) {
+                    syslog(LOG_ERR, 'Unable to dump ' . CROWDSEC_FIREWALL_CONF . ': ' . $exception->getMessage());
+                }
             }
         }
         // Start service
