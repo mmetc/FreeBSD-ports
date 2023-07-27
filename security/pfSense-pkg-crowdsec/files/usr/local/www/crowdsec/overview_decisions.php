@@ -23,6 +23,8 @@
 $objects = json_decode(shell_exec("/usr/local/bin/cscli decisions list -l 0 -o json | sed 's/^null$/\[\]/'"), true);
 
 $tableContent = '';
+$count = 0;
+$perPage = 10;
 
 function startsWith( $haystack, $needle ) {
     $length = strlen( $needle );
@@ -50,18 +52,19 @@ if ($objects) {
             <td>' . ($decision['duration'] ?? '') . '</td>
             <td>' . ($object['id'] ?? '') . '</td>
           </tr>' . PHP_EOL;
+            $count++;
         }
     }
 }
-
+$pagination = $count > $perPage ? "true" : "false";
 $content = <<<EOT
 <script type="text/javascript">
     $("#decisionsTable").fancyTable({
       sortColumn: 0,
-      pagination: true,
+      pagination: $pagination,
       searchable: true,
       sortable:true,
-      perPage: 10,
+      perPage: $perPage,
       globalSearch:true
     });
   </script>

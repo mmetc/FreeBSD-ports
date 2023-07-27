@@ -40,6 +40,8 @@ display_top_tabs($tab_array);
 $objects = json_decode(shell_exec("/usr/local/bin/cscli machines list -o json | sed 's/^null$/\[\]/'"), true);
 
 $tableContent = '';
+$count = 0;
+$perPage = 10;
 
 if($objects){
     foreach ($objects as $object)
@@ -51,8 +53,11 @@ if($objects){
             <td>'.(!empty($object['isValidated']) ? 'Yes': 'No').'</td>
             <td>'.($object['version']??'').'</td>
           </tr>' . PHP_EOL;
+        $count++;
     }
 }
+
+$pagination = $count > $perPage ? "true" : "false";
 
 $content = <<<EOT
   <script type="text/javascript">
@@ -74,10 +79,10 @@ $content = <<<EOT
     });
     $("#machinesTable").fancyTable({
       sortColumn: 0,
-      pagination: true,
+      pagination: $pagination,
       searchable: true,
       sortable:true,
-      perPage: 10,
+      perPage: $perPage,
       globalSearch:true
     });
   });

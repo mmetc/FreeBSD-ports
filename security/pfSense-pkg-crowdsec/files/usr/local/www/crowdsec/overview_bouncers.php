@@ -22,7 +22,8 @@
 $objects = json_decode(shell_exec("/usr/local/bin/cscli bouncers list -o json | sed 's/^null$/\[\]/'"), true);
 
 $tableContent = '';
-
+$count = 0;
+$perPage = 10;
 if($objects){
     foreach ($objects as $object)
     {
@@ -34,19 +35,20 @@ if($objects){
             <td>'.($object['auth_type']??'').'</td>
             <td>'.($object['version']??'').'</td>
           </tr>' . PHP_EOL;
+        $count++;
     }
 }
-
+$pagination = $count > $perPage ? "true" : "false";
 
 
 $content = <<<EOT
 <script type="text/javascript">
     $("#bouncersTable").fancyTable({
       sortColumn: 0,
-      pagination: true,
+      pagination: $pagination,
       searchable: true,
       sortable:true,
-      perPage: 10,
+      perPage: $perPage,
       globalSearch:true
     });
   </script>

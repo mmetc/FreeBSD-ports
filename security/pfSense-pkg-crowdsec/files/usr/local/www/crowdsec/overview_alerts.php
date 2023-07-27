@@ -44,6 +44,8 @@ function getDecisionsByType($decisions)
 $objects = json_decode(shell_exec("/usr/local/bin/cscli alerts list -l 0 -o json | sed 's/^null$/\[\]/'"), true);
 
 $tableContent = '';
+$count = 0;
+$perPage = 10;
 
 if ($objects) {
     foreach ($objects as $object) {
@@ -59,17 +61,18 @@ if ($objects) {
             <td>'. getDecisionsByType($object['decisions']) .'</td>
             <td>' . ($object['created_at'] ?? '') . '</td>
           </tr>' . PHP_EOL;
+        $count++;
     }
 }
-
+$pagination = $count > $perPage ? "true" : "false";
 $content = <<<EOT
 <script type="text/javascript">
     $("#alertsTable").fancyTable({
       sortColumn: 0,
-      pagination: true,
+      pagination: $pagination,
       searchable: true,
       sortable:true,
-      perPage: 10,
+      perPage: $perPage,
       globalSearch:true
     });
   </script>
