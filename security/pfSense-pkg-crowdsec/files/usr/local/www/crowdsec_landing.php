@@ -1,6 +1,6 @@
 <?php
 /*
- * crowdsec.inc
+ * crowdsec_landing.php
  *
  * part of pfSense (https://www.pfsense.org)
  * Copyright (c) 2020-2023 Crowdsec
