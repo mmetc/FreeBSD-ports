@@ -70,13 +70,9 @@ $content = <<<EOT
         });
       }
     });
-    jQuery(document).ready(function() {
-                    var s = document.createElement("script");
-                    s.type = "text/javascript";
-                    s.src = "/crowdsec/js/fancyTable.min.js";
-                    // Use any selector
-                    jQuery("head").append(s);
-    });
+    
+    jQuery('<script>').attr('type', 'text/javascript').attr('src','/crowdsec/js/fancyTable.min.js').appendTo('head');   
+    
     $("#machinesTable").fancyTable({
       sortColumn: 0,
       pagination: $pagination,
@@ -120,17 +116,7 @@ EOT;
 
 
 
-
-
-
-
 echo $content;
 
 
 include("foot.inc");
-
-$after_footer = <<<EOT
- <script type="text/javascript" src="/crowdsec/js/fancyTable.min.js"></script>
-EOT;
-
-echo $after_footer;

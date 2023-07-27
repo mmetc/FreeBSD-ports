@@ -47,6 +47,8 @@ do-install:
     			${STAGEDIR}${PREFIX}/www/crowdsec
 	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/overview_decisions.php \
     			${STAGEDIR}${PREFIX}/www/crowdsec
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/overview_scenarios.php \
+        			${STAGEDIR}${PREFIX}/www/crowdsec
 	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/fancyTable.min.js \
         			${STAGEDIR}${PREFIX}/www/crowdsec/js
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/crowdsec.inc \

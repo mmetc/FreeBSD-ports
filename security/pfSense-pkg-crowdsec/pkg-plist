@@ -13,6 +13,7 @@ www/crowdsec/overview_bouncers.php
 www/crowdsec/overview_alerts.php
 www/crowdsec/overview_collections.php
 www/crowdsec/overview_decisions.php
+www/crowdsec/overview_scenarios.php
 www/crowdsec/js/fancyTable.min.js
 @dir /etc/inc/priv
 @dir /etc/inc
