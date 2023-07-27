@@ -60,6 +60,7 @@ if($objects){
 $pagination = $count > $perPage ? "true" : "false";
 
 $content = <<<EOT
+  <script src="/crowdsec/js/fancyTable.min.js" defer></script>
   <script type="text/javascript">
   events.push(function() {
     jQuery( "#tabs" ).tabs({
@@ -71,9 +72,7 @@ $content = <<<EOT
       }
     });
     
-    jQuery('<script>').attr('type', 'text/javascript').attr('src','/crowdsec/js/fancyTable.min.js').appendTo('head');   
-    
-    $("#machinesTable").fancyTable({
+    jQuery("#machinesTable").fancyTable({
       sortColumn: 0,
       pagination: $pagination,
       searchable: true,
@@ -113,7 +112,6 @@ $content = <<<EOT
   </div>
 </div>
 EOT;
-
 
 
 echo $content;
