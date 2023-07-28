@@ -265,7 +265,8 @@ function crowdsec_resync_config()
         mwexec('service crowdsec start');
     } else {
         // Disable service
-        mwexec('service crowdsec stop && service crowdsec disable');
+        mwexec('service crowdsec stop');
+        mwexec('service crowdsec disable');
     }
 
     // Handle crowdsec_firewall service start
@@ -310,7 +311,8 @@ function crowdsec_resync_config()
         mwexec('service crowdsec_firewall start');
     } else {
         // Disable service
-        mwexec('service crowdsec_firewall stop && service crowdsec_firewall disable');
+        mwexec('service crowdsec_firewall stop');
+        mwexec('service crowdsec_firewall disable');
     }
 }
 

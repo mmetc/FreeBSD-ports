@@ -37,64 +37,31 @@ $tab_array[] = array("Settings", false, "/pkg_edit.php?xml=crowdsec.xml&amp;id=0
 $tab_array[] = array("Status", true, "/crowdsec_status.php");
 display_top_tabs($tab_array);
 
-$objects = json_decode(shell_exec("/usr/local/bin/cscli machines list -o json | sed 's/^null$/\[\]/'"), true);
 
-$tableContent = '';
-$count = 0;
-$perPage = 10;
 
-if($objects){
-    foreach ($objects as $object)
-    {
-        $tableContent .= '<tr>
-            <td>'.($object['machineId']??'').'</td>
-            <td>'.($object['ipAddress']??'').'</td>
-            <td>'.($object['updated_at']??'').'</td>
-            <td>'.(!empty($object['isValidated']) ? 'Yes': 'No').'</td>
-            <td>'.($object['version']??'').'</td>
-          </tr>' . PHP_EOL;
-        $count++;
-    }
-}
-
-$pagination = $count > $perPage ? "true" : "false";
 
 $content = <<<EOT
   <script src="/crowdsec/js/fancyTable.min.js" defer></script>
-  <script type="text/javascript">
-  events.push(function() {
-    jQuery( "#tabs" ).tabs({
-      beforeLoad: function( event, ui ) {
-        ui.jqXHR.fail(function() {
-          ui.panel.html(
-            "Couldn't load this tab. We'll try to fix this as soon as possible." );
-        });
-      }
-    });
+  <script src="/crowdsec/js/status.js" defer></script>
+    <script>
     
-    jQuery("#machinesTable").fancyTable({
-      sortColumn: 0,
-      pagination: $pagination,
-      searchable: true,
-      sortable:true,
-      perPage: $perPage,
-      globalSearch:true
+    events.push(function() {
+         CrowdSec.init();
     });
-  });
-  </script>
+    </script>
 
 <div id="tabs">
   <ul>
-    <li><a href="#tabs-1">Machines</a></li>
-    <li><a href="/crowdsec/overview_bouncers.php">Bouncers</a></li>
-    <li><a href="/crowdsec/overview_collections.php">Collections</a></li>
-    <li><a href="/crowdsec/overview_scenarios.php">Scenarios</a></li>
-    <li><a href="/crowdsec/overview_parsers.php">Parsers</a></li>
-    <li><a href="/crowdsec/overview_postoverflows.php">Postoverflows</a></li>
-    <li><a href="/crowdsec/overview_alerts.php">Alerts</a></li>
-    <li><a href="/crowdsec/overview_decisions.php">Decisions</a></li>
+    <li><a href="#tab-machines">Machines</a></li>
+    <li><a href="#tab-bouncers">Bouncers</a></li>
+    <li><a href="#tab-collections">Collections</a></li>
+    <li><a href="#tab-scenarios">Scenarios</a></li>
+    <li><a href="#tab-parsers">Parsers</a></li>
+    <li><a href="#tab-postoverflows">Postoverflows</a></li>
+    <li><a href="#tab-alerts">Alerts</a></li>
+    <li><a href="#tab-decisions">Decisions</a></li>
   </ul>
-  <div id="tabs-1">
+  <div id="tab-machines">
     <table id="machinesTable" class="table table-striped crowdsecTable">
         <thead>
             <tr>
@@ -106,10 +73,143 @@ $content = <<<EOT
             </tr>
         </thead>
         <tbody>
-          $tableContent
         </tbody>
     </table>
   </div>
+  <div id="tab-bouncers">
+    <table id="bouncersTable" class="table table-striped crowdsecTable">
+        <thead>
+            <tr>
+              <th>Name</th>
+              <th>IP Address</th>
+              <th>Valid</th>
+              <th data-sortas="datetime">Last API Pull</th>
+              <th>Type</th>
+              <th>Version</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+  </div>
+  <div id="tab-collections">
+    <table id="collectionsTable" class="table table-striped crowdsecTable">
+        <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Version</th>
+              <th>Local Path</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+  </div>
+  <div id="tab-scenarios">
+      <table id="scenariosTable" class="table table-striped crowdsecTable">
+        <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Version</th>
+              <th>Path</th>
+              <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+  </div>
+  <div id="tab-parsers">
+      <table id="parsersTable" class="table table-striped crowdsecTable">
+        <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Version</th>
+              <th>Path</th>
+              <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+  </div>
+  <div id="tab-postoverflows">
+      <table id="postoverflowsTable" class="table table-striped crowdsecTable">
+        <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Version</th>
+              <th>Path</th>
+              <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+  </div>
+  <div id="tab-alerts">
+    <table id="alertsTable" class="table table-striped crowdsecTable">
+        <thead>
+            <tr>
+              <th data-sortas="numeric">ID</th>
+              <th>Value</th>
+              <th>Reason</th>
+              <th>Country</th>
+              <th>AS</th>
+              <th>Decisions</th>
+              <th data-sortas="datetime">Created At</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+  </div>
+  <div id="tab-decisions">
+    <table id="decisionsTable" class="table table-striped crowdsecTable">
+        <thead>
+            <tr>
+              <th></th>
+              <th data-sortas="numeric">ID</th>
+              <th>Source</th>
+              <th>Scope:Value</th>
+              <th>Reason</th>
+              <th>Action</th>
+              <th>Country</th>
+              <th>AS</th>
+              <th>Events</th>
+              <th>Expiration</th>
+              <th data-sortas="numeric">Alert&nbsp;ID</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+  </div>
+</div>
+<!-- Modal popup to confirm decision deletion -->
+<div class="modal fade" id="delete-decision-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="modalLabel">Modal Title</h4>
+            </div>
+            <div class="modal-body">
+                Modal content...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No, cancel</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="delete-decision-confirm">Yes, 
+                delete</button>
+            </div>
+        </div>
+    </div>
 </div>
 EOT;
 
