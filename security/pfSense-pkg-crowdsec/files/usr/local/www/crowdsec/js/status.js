@@ -373,7 +373,7 @@ const CrowdSec = (function () {
         const action = 'decisions-list';
         const dataCallback = function (data) {
             const rows = [];
-            const perPage = 10;
+            const perPage = 500;
             let count = 0;
             data.map(function (row) {
                 row.decisions.map(function (decision) {

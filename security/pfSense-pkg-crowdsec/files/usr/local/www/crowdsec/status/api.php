@@ -54,14 +54,6 @@ if ($method === 'DELETE' && isset($_GET['action']) && isset($_GET['decision_id']
         case 'decisions-list':
             echo shell_exec("/usr/local/bin/cscli decisions list -l 0 -o json | sed 's/^null$/\[\]/'");
             break;
-        case 'decision-delete':
-            $id = strip_tags($_POST['decision_id']);
-            if (!empty($id)) {
-                echo shell_exec("/usr/local/bin/cscli --error decisions delete --id $id 2>&1");
-            } else {
-                echo $default;
-            }
-            break;
         case 'machines-list':
             echo shell_exec("/usr/local/bin/cscli machines list -o json | sed 's/^null$/\[\]/'");
             break;
