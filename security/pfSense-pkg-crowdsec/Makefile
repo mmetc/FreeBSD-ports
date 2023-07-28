@@ -29,6 +29,7 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/crowdsec/js
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/crowdsec/status
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 	${MKDIR} ${STAGEDIR}${DATADIR}
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/rc.conf.d/
@@ -39,18 +40,12 @@ do-install:
     		${STAGEDIR}${PREFIX}/www
 	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec_status.php \
 			${STAGEDIR}${PREFIX}/www
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/overview_bouncers.php \
-    			${STAGEDIR}${PREFIX}/www/crowdsec
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/overview_alerts.php \
-    			${STAGEDIR}${PREFIX}/www/crowdsec
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/overview_collections.php \
-    			${STAGEDIR}${PREFIX}/www/crowdsec
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/overview_decisions.php \
-    			${STAGEDIR}${PREFIX}/www/crowdsec
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/overview_scenarios.php \
-        			${STAGEDIR}${PREFIX}/www/crowdsec
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/status/api.php \
+          			${STAGEDIR}${PREFIX}/www/crowdsec/status
 	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/fancyTable.min.js \
         			${STAGEDIR}${PREFIX}/www/crowdsec/js
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/status.js \
+           			${STAGEDIR}${PREFIX}/www/crowdsec/js
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/crowdsec.inc \
 			${STAGEDIR}${PREFIX}/www/shortcuts
 	${INSTALL_DATA} ${FILESDIR}/etc/inc/priv/crowdsec.priv.inc \
