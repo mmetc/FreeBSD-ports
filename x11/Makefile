@@ -272,6 +272,7 @@
     SUBDIR += nvidia-xconfig
     SUBDIR += nwg-bar
     SUBDIR += nwg-dock
+    SUBDIR += nwg-dock-hyprland
     SUBDIR += nwg-drawer
     SUBDIR += nwg-launchers
     SUBDIR += nwg-look
@@ -328,6 +329,7 @@
     SUBDIR += remontoire
     SUBDIR += rendercheck
     SUBDIR += rgb
+    SUBDIR += rio
     SUBDIR += rlaunch
     SUBDIR += rofi
     SUBDIR += rofi-calc
@@ -342,6 +344,7 @@
     SUBDIR += rxvt-unicode
     SUBDIR += sakura
     SUBDIR += salut
+    SUBDIR += sandbar
     SUBDIR += sbxkb
     SUBDIR += screen-message
     SUBDIR += screengrab
@@ -411,6 +414,7 @@
     SUBDIR += virtualgl
     SUBDIR += wallutils
     SUBDIR += wapanel
+    SUBDIR += watershot
     SUBDIR += way-displays
     SUBDIR += waybar
     SUBDIR += wayidle

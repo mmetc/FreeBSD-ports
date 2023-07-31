@@ -1,5 +1,5 @@
 PORTNAME=	storj
-PORTVERSION=	1.79.4
+PORTVERSION=	1.81.3
 DISTVERSIONPREFIX=	v
 CATEGORIES=	net
 
@@ -14,7 +14,7 @@ USE_GITHUB=	yes
 
 .include "${.CURDIR}/Makefile.deps"
 
-STORJ_CMDS=	certificates crashcollect identity inspector metric-receiver \
+STORJ_CMDS=	certificates crashcollect identity metric-receiver \
 		multinode satellite storagenode storagenode-updater \
 		storj-admin storj-sim uplink versioncontrol
 

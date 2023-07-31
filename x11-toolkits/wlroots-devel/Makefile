@@ -1,6 +1,6 @@
 PORTNAME=	wlroots
-DISTVERSION=	0.16.0-569
-DISTVERSIONSUFFIX=	-g${GL_COMMIT:C/(.{12}).*/\1/}
+DISTVERSION=	0.16.0-665
+DISTVERSIONSUFFIX=	-g63f5851b6f
 CATEGORIES=	x11-toolkits
 PKGNAMESUFFIX=	-devel
 
@@ -27,7 +27,6 @@ USE_GL=		gbm
 USE_XORG=	pixman
 USE_LDCONFIG=	yes
 GL_SITE=	https://gitlab.freedesktop.org
-GL_COMMIT=	06c0b0a204e36f90e7e1c78d8e67035620fd5516
 MESON_ARGS=	-Dexamples=false -Dbackends=${BACKENDS:ts,} -Drenderers=${RENDERERS:ts,}
 
 .ifdef PKGNAMESUFFIX
