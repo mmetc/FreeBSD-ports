@@ -56,6 +56,26 @@ padding: 4rem;
   word-break: break-all;
 }
 
+.content-box table {
+  table-layout: auto;
+}
+
+table.bootgrid-table tr .btn-sm {
+  padding: 2px 6px;
+}
+
+table.bootgrid-table tr > td {
+  padding: 3px;
+}
+
+li.spaced {
+  margin-left: 15px;
+}
+
+ul.nav>li>a {
+  padding: 6px;
+}
+
 </style>
 EOT;
 
@@ -86,7 +106,7 @@ $content = <<<EOT
   </ul>
   <div class="loading"><i class="fa fa-spinner fa-spin"></i>Loading, please wait..</div>
   <div id="tab-machines">
-    <table class="table table-condensed table-hover table-striped crowdsecTable">
+    <table id="table-machines" class="table table-condensed table-hover table-striped crowdsecTable">
             <thead>
                 <tr>
                   <th data-column-id="name">Name</th>
@@ -105,7 +125,7 @@ $content = <<<EOT
         </table>
   </div>
   <div id="tab-bouncers">
-   <table class="table table-condensed table-hover table-striped crowdsecTable">
+   <table id="table-bouncers" class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
               <th data-column-id="name">Name</th>
@@ -125,7 +145,7 @@ $content = <<<EOT
     </table>
   </div>
   <div id="tab-collections">
-    <table class="table table-condensed table-hover table-striped crowdsecTable">
+    <table id="table-collections" class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
               <th data-column-id="name">Name</th>
@@ -143,7 +163,7 @@ $content = <<<EOT
     </table>
   </div>
   <div id="tab-scenarios">
-     <table class="table table-condensed table-hover table-striped crowdsecTable">
+     <table id="table-scenarios" class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
               <th data-column-id="name">Name</th>
@@ -162,7 +182,7 @@ $content = <<<EOT
     </table>
   </div>
   <div id="tab-parsers">
-      <table class="table table-condensed table-hover table-striped crowdsecTable">
+      <table id="table-parsers" class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
               <th data-column-id="name">Name</th>
@@ -181,7 +201,7 @@ $content = <<<EOT
     </table>
   </div>
   <div id="tab-postoverflows">
-      <table class="table table-condensed table-hover table-striped crowdsecTable">
+      <table id="table-postoverflows" class="table table-condensed table-hover table-striped crowdsecTable">
             <thead>
                 <tr>
                   <th data-column-id="name">Name</th>
@@ -200,7 +220,7 @@ $content = <<<EOT
         </table>
   </div>
   <div id="tab-alerts">
-    <table class="table table-condensed table-hover table-striped crowdsecTable">
+    <table id="table-alerts" class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
               <th data-column-id="id" data-type="numeric">ID</th>
@@ -221,7 +241,9 @@ $content = <<<EOT
     </table>
   </div>
   <div id="tab-decisions">
-    <table class="table table-condensed table-hover table-striped crowdsecTable">
+    <table id="table-decisions" class="table table-condensed table-hover table-striped crowdsecTable">
+      <p>Note: the decisions coming from the CAPI (signals collected by the CrowdSec users) do not appear here.
+        To show them, use <code>cscli decisions list -a</code> in a shell.</p>
             <thead>
                 <tr>
                   <th data-column-id="delete" data-formatter="delete" data-visible-in-selection="false"></th>

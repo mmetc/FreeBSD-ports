@@ -88,7 +88,7 @@ const CrowdSec = (function () {
 
     function _addFreshness (selector) {
         // this creates one timer per tab
-        var freshnessTemplate = '<span style="float:left">Last refresh: <span class="freshness"></span></span>';
+        var freshnessTemplate = '<span style="float:left;"><i>Last refresh: <span class="freshness"></span></i></span>';
         $(selector).find('.actionBar').prepend(freshnessTemplate);
         setInterval(function () {
             _updateFreshness(selector);
