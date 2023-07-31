@@ -96,6 +96,7 @@ const CrowdSec = (function () {
     }
 
     function _refreshTab (selector, action, dataCallback) {
+        $('.loading').show();
         $.ajax({
             url: api_url,
             cache: false,
@@ -103,7 +104,10 @@ const CrowdSec = (function () {
             data: {action: action},
             type: 'POST',
             method: 'POST',
-            success: dataCallback
+            success: dataCallback,
+            complete: function() {
+                $( ".loading" ).hide();
+            }
         })
         _updateFreshness(selector, moment());
     }

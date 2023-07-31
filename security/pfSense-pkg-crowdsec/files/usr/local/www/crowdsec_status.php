@@ -42,10 +42,16 @@ $css = <<<EOT
 .search .fa-search {
   font-weight: bolder !important;
 }
+.no-results {
+ display:none !important;
+}
+
+.loading {
+text-align:center;
+padding: 4rem;
+}
 </style>
 EOT;
-
-echo $css;
 
 
 $content = <<<EOT
@@ -72,6 +78,7 @@ $content = <<<EOT
     <li><a href="#tab-alerts">Alerts</a></li>
     <li><a href="#tab-decisions">Decisions</a></li>
   </ul>
+  <div class="loading"><i class="fa fa-spinner fa-spin"></i>Loading, please wait..</div>
   <div id="tab-machines">
     <table class="table table-condensed table-hover table-striped crowdsecTable">
             <thead>
@@ -258,6 +265,8 @@ EOT;
 
 
 echo $content;
+
+echo $css;
 
 
 include("foot.inc");
