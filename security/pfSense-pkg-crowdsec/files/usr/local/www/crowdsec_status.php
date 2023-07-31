@@ -50,6 +50,12 @@ $css = <<<EOT
 text-align:center;
 padding: 4rem;
 }
+
+.table td {
+  white-space: break-spaces;
+  word-break: break-all;
+}
+
 </style>
 EOT;
 
