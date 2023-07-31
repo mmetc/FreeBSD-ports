@@ -172,6 +172,7 @@ const CrowdSec = (function () {
             _addFreshness(selector);
             _refreshTab(selector, action, dataCallback);
         }).bootgrid({
+            rowCount: [10, 25, 50, 100],
             caseSensitive: false,
             formatters: _dataFormatters
         });
