@@ -10,8 +10,12 @@ www/shortcuts/crowdsec.inc
 www/crowdsec_landing.php
 www/crowdsec_status.php
 www/crowdsec/status/api.php
-www/crowdsec/js/fancyTable.min.js
 www/crowdsec/js/status.js
+www/crowdsec/css/jquery.bootgrid.min.css
+www/crowdsec/js/jquery.bootgrid.min.js
+www/crowdsec/js/jquery.bootgrid.fa.min.js
+www/crowdsec/js/moment.min.js
+
 @dir /etc/inc/priv
 @dir /etc/inc
 
