@@ -246,7 +246,8 @@ $content = <<<EOT
         To show them, use <code>cscli decisions list -a</code> in a shell.</p>
             <thead>
                 <tr>
-                  <th data-column-id="delete" data-formatter="delete" data-visible-in-selection="false"></th>
+                  <th data-column-id="delete" data-formatter="delete" 
+                  data-visible-in-selection="false"></th>
                   <th data-column-id="id" data-identifier="true" data-type="numeric">ID</th>
                   <th data-column-id="source">Source</th>
                   <th data-column-id="scope_value">Scope:Value</th>
@@ -269,7 +270,8 @@ $content = <<<EOT
   </div>
 </div>
 <!-- Modal popup to confirm decision deletion -->
-<div class="modal fade" id="delete-decision-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+<div class="modal fade" id="remove-decision-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" 
+aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -282,8 +284,10 @@ $content = <<<EOT
                 Modal content...
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">No, cancel</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal" id="delete-decision-confirm">Yes, 
+                <button type="button" class="nowarn no-confirm btn btn-secondary" data-dismiss="modal">No, 
+                cancel</button>
+                <button type="button" class="nowarn no-confirm btn btn-danger" data-dismiss="modal" 
+                id="remove-decision-confirm">Yes, 
                 delete</button>
             </div>
         </div>
