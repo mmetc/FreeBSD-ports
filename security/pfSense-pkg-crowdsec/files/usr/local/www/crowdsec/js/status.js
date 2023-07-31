@@ -7,7 +7,50 @@ const CrowdSec = (function () {
     'use strict';
 
     const api_url = '/crowdsec/status/api.php';
-    const default_result = 'No results found';
+    const _refreshTemplate = '<button class="btn btn-default" type="button" title="Refresh"><span class="icon fa fa-refresh"></span></button>';
+
+    const _dataFormatters = {
+        yesno: function (column, row) {
+            return _yesno2html(row[column.id]);
+        },
+
+        delete: function (column, row) {
+            var val = row.id;
+            if (isNaN(val)) {
+                return '';
+            }
+            return '<button type="button" class="btn btn-secondary btn-sm" value="' + val + '" onclick="CrowdSec.deleteDecision(' + val + ')"><i class="fa fa-trash" /></button>';
+        },
+
+        duration: function (column, row) {
+            var duration = row[column.id];
+            if (!duration) {
+                return 'n/a';
+            }
+            return $('<div>').attr({
+                'data-toggle': 'tooltip',
+                'data-placement': 'left',
+                title: duration
+            }).text(_humanizeDuration(duration)).prop('outerHTML');
+        },
+
+        datetime: function (column, row) {
+            var dt = row[column.id];
+            var parsed = moment(dt);
+            if (!dt) {
+                return '';
+            }
+            if (!parsed.isValid()) {
+                console.error('Cannot parse timestamp: %s', dt);
+                return '???';
+            }
+            return $('<div>').attr({
+                'data-toggle': 'tooltip',
+                'data-placement': 'left',
+                title: parsed.format()
+            }).text(_humanizeDate(dt)).prop('outerHTML');
+        }
+    };
 
     function _decisionsByType(decisions) {
         const dectypes = {};
@@ -28,12 +71,89 @@ const CrowdSec = (function () {
         return ret;
     }
 
-    function _getDeleteButton(decision) {
-        const val = decision.id;
-        if (isNaN(val)) {
-            return '';
+    function _updateFreshness (selector, timestamp) {
+        var $freshness = $(selector).find('.actionBar .freshness');
+        if (timestamp) {
+            $freshness.data('refresh_timestamp', timestamp);
+        } else {
+            timestamp = $freshness.data('refresh_timestamp');
         }
-        return '<button type="button" class="btn btn-secondary btn-sm" value="' + val + '" onclick="CrowdSec.deleteDecision(' + val + ')"><i class="fa fa-trash" /></button>';
+        var howlongHuman = '???';
+        if (timestamp) {
+            var howlongms = moment() - moment(timestamp);
+            howlongHuman = moment.duration(howlongms).humanize();
+        }
+        $freshness.text(howlongHuman + ' ago');
+    }
+
+    function _addFreshness (selector) {
+        // this creates one timer per tab
+        var freshnessTemplate = '<span style="float:left">Last refresh: <span class="freshness"></span></span>';
+        $(selector).find('.actionBar').prepend(freshnessTemplate);
+        setInterval(function () {
+            _updateFreshness(selector);
+        }, 5000);
+    }
+
+    function _refreshTab (selector, action, dataCallback) {
+        $('.loading').show();
+        $.ajax({
+            url: api_url,
+            cache: false,
+            dataType: 'json',
+            data: {action: action},
+            type: 'POST',
+            method: 'POST',
+            success: dataCallback,
+            complete: function() {
+                $( ".loading" ).hide();
+            }
+        })
+        _updateFreshness(selector, moment());
+    }
+
+    function _parseDuration (duration) {
+        var re = /(-?)(?:(?:(\d+)h)?(\d+)m)?(\d+).\d+(m?)s/m;
+        var matches = duration.match(re);
+        var seconds = 0;
+
+        if (!matches.length) {
+            throw new Error('Unable to parse the following duration: ' + duration + '.');
+        }
+        if (typeof matches[2] !== 'undefined') {
+            seconds += parseInt(matches[2], 10) * 3600; // hours
+        }
+        if (typeof matches[3] !== 'undefined') {
+            seconds += parseInt(matches[3], 10) * 60; // minutes
+        }
+        if (typeof matches[4] !== 'undefined') {
+            seconds += parseInt(matches[4], 10); // seconds
+        }
+        if (parseInt(matches[5], 10) === 'm') {
+            // units in milliseconds
+            seconds *= 0.001;
+        }
+        if (parseInt(matches[1], 10) === '-') {
+            // negative
+            seconds = -seconds;
+        }
+        return seconds;
+    }
+
+    function _humanizeDate (text) {
+        return moment(text).fromNow();
+    }
+
+    function _humanizeDuration (text) {
+        return moment.duration(_parseDuration(text), 'seconds').humanize();
+    }
+
+    function _yesno2html (val) {
+        if (val) {
+            return '<i class="fa fa-check text-success"></i>';
+        } else {
+            return '<i class="fa fa-times text-danger"></i>';
+        }
     }
 
     function _initTab(selector, action, dataCallback) {
@@ -42,35 +162,26 @@ const CrowdSec = (function () {
         if (!table.length) {
             return;
         }
-        const search = table.find('.fancySearchRow');
-        if (search.length) {
-            search.remove();
-        }
-        const pagination = table.find('tfoot .pag');
-        if (pagination.length) {
-            pagination.remove();
-        }
-        table.find('tbody').html('<div class="loading">\n' +
-            '\t<i class="fa fa-spinner fa-spin"></i> Loading, please wait...\n' +
-            '</div>');
-
-        $.ajax({
-            url: api_url,
-            cache: false,
-            dataType: 'json',
-            data: {action: action},
-            type: 'POST',
-            method: 'POST',
-            success: dataCallback
-        })
+        // Navigation
+        window.location.hash = selector;
+        history.pushState(null, null, window.location.hash);
+        table.on('initialized.rs.jquery.bootgrid', function () {
+            $(_refreshTemplate).on('click', function () {
+                _refreshTab(selector, action, dataCallback);
+            }).insertBefore(tab.find('.actionBar .actions .dropdown:first'));
+            _addFreshness(selector);
+            _refreshTab(selector, action, dataCallback);
+        }).bootgrid({
+            caseSensitive: false,
+            formatters: _dataFormatters
+        });
     }
 
     function _initMachines() {
         const action = 'machines-list';
+        const id = '#tab-machines';
         const dataCallback = function (data) {
             const rows = [];
-            let count = 0;
-            const perPage = 10;
             data.map(function (row) {
                 rows.push({
                     name: row.machineId,
@@ -80,40 +191,16 @@ const CrowdSec = (function () {
                     version: row.version || ' '
                 });
             });
-            let content = '';
-            if (!rows.length) {
-                content = default_result;
-            }
-            for (const line of rows) {
-                content += '<tr>' +
-                    '<td>' + line['name'] + '</td>' +
-                    '<td>' + line['ip_address'] + '</td>' +
-                    '<td>' + line['last_update'] + '</td>' +
-                    '<td>' + line['validated'] + '</td>' +
-                    '<td>' + line['version'] + '</td>' +
-                    '</tr>';
-                count++;
-            }
-
-            $('#tab-machines table tbody').html(content);
-            $("#machinesTable").fancyTable({
-                sortColumn: 0,
-                pagination: count > perPage,
-                searchable: true,
-                sortable: true,
-                perPage: perPage,
-                globalSearch: true
-            });
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
         };
-        _initTab('#tab-machines', action, dataCallback);
+        _initTab(id, action, dataCallback);
     }
 
     function _initCollections() {
         const action = 'collections-list';
+        const id = "#tab-collections";
         const dataCallback = function (data) {
             const rows = [];
-            let count = 0;
-            const perPage = 10;
             data.collections.map(function (row) {
                 rows.push({
                     name: row.name,
@@ -122,39 +209,16 @@ const CrowdSec = (function () {
                     local_path: row.local_path || ' '
                 });
             });
-            let content = '';
-            if (!rows.length) {
-                content = default_result;
-            }
-            for (const line of rows) {
-                content += '<tr>' +
-                    '<td>' + line['name'] + '</td>' +
-                    '<td>' + line['status'] + '</td>' +
-                    '<td>' + line['local_version'] + '</td>' +
-                    '<td>' + line['local_path'] + '</td>' +
-                    '</tr>';
-                count++;
-            }
-
-            $('#tab-collections table tbody').html(content);
-            $("#collectionsTable").fancyTable({
-                sortColumn: 0,
-                pagination: count > perPage,
-                searchable: true,
-                sortable: true,
-                perPage: perPage,
-                globalSearch: true
-            });
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
         };
-        _initTab('#tab-collections', action, dataCallback);
+        _initTab(id, action, dataCallback);
     }
 
     function _initScenarios() {
         const action = 'scenarios-list';
+        const id = "#tab-scenarios";
         const dataCallback = function (data) {
             const rows = [];
-            let count = 0;
-            const perPage = 10;
             data.scenarios.map(function (row) {
                 rows.push({
                     name: row.name,
@@ -164,40 +228,16 @@ const CrowdSec = (function () {
                     description: row.description || ' '
                 });
             });
-            let content = '';
-            if (!rows.length) {
-                content = default_result;
-            }
-            for (const line of rows) {
-                content += '<tr>' +
-                    '<td>' + line['name'] + '</td>' +
-                    '<td>' + line['status'] + '</td>' +
-                    '<td>' + line['local_version'] + '</td>' +
-                    '<td>' + line['local_path'] + '</td>' +
-                    '<td>' + line['description'] + '</td>' +
-                    '</tr>';
-                count++;
-            }
-
-            $('#tab-scenarios table tbody').html(content);
-            $("#scenariosTable").fancyTable({
-                sortColumn: 0,
-                pagination: count > perPage,
-                searchable: true,
-                sortable: true,
-                perPage: perPage,
-                globalSearch: true
-            });
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
         };
-        _initTab('#tab-scenarios', action, dataCallback);
+        _initTab(id, action, dataCallback);
     }
 
     function _initParsers() {
         const action = 'parsers-list';
+        const id = "#tab-parsers";
         const dataCallback = function (data) {
             const rows = [];
-            let count = 0;
-            const perPage = 10;
             data.parsers.map(function (row) {
                 rows.push({
                     name: row.name,
@@ -207,39 +247,16 @@ const CrowdSec = (function () {
                     description: row.description || ' '
                 });
             });
-            let content = '';
-            if (!rows.length) {
-                content = default_result;
-            }
-            for (const line of rows) {
-                content += '<tr>' +
-                    '<td>' + line['name'] + '</td>' +
-                    '<td>' + line['status'] + '</td>' +
-                    '<td>' + line['local_version'] + '</td>' +
-                    '<td>' + line['local_path'] + '</td>' +
-                    '<td>' + line['description'] + '</td>' +
-                    '</tr>';
-                count++;
-            }
-            $('#tab-parsers table tbody').html(content);
-            $("#parsersTable").fancyTable({
-                sortColumn: 0,
-                pagination: count > perPage,
-                searchable: true,
-                sortable: true,
-                perPage: perPage,
-                globalSearch: true
-            });
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
         };
-        _initTab('#tab-parsers ', action, dataCallback);
+        _initTab(id, action, dataCallback);
     }
 
     function _initPostoverflows() {
         const action = 'postoverflows-list';
+        const id = "#tab-postoverflows";
         const dataCallback = function (data) {
             const rows = [];
-            let count = 0;
-            const perPage = 10;
             data.postoverflows.map(function (row) {
                 rows.push({
                     name: row.name,
@@ -249,39 +266,16 @@ const CrowdSec = (function () {
                     description: row.description || ' '
                 });
             });
-            let content = '';
-            if (!rows.length) {
-                content = default_result;
-            }
-            for (const line of rows) {
-                content += '<tr>' +
-                    '<td>' + line['name'] + '</td>' +
-                    '<td>' + line['status'] + '</td>' +
-                    '<td>' + line['local_version'] + '</td>' +
-                    '<td>' + line['local_path'] + '</td>' +
-                    '<td>' + line['description'] + '</td>' +
-                    '</tr>';
-                count++;
-            }
-            $('#tab-postoverflows table tbody').html(content);
-            $("#postoverflowsTable").fancyTable({
-                sortColumn: 0,
-                pagination: count > perPage,
-                searchable: true,
-                sortable: true,
-                perPage: perPage,
-                globalSearch: true
-            });
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
         };
-        _initTab('#tab-postoverflows ', action, dataCallback);
+        _initTab(id, action, dataCallback);
     }
 
     function _initBouncers() {
         const action = 'bouncers-list';
+        const id = "#tab-bouncers";
         const dataCallback = function (data) {
             const rows = [];
-            let count = 0;
-            const perPage = 10;
             data.map(function (row) {
                 // TODO - remove || ' ' later, it was fixed for 1.3.3
                 rows.push({
@@ -293,41 +287,16 @@ const CrowdSec = (function () {
                     version: row.version || ' '
                 });
             });
-            let content = '';
-            if (!rows.length) {
-                content = default_result;
-            }
-            for (const line of rows) {
-                content += '<tr>' +
-                    '<td>' + line['name'] + '</td>' +
-                    '<td>' + line['ip_address'] + '</td>' +
-                    '<td>' + line['valid'] + '</td>' +
-                    '<td>' + line['last_pull'] + '</td>' +
-                    '<td>' + line['type'] + '</td>' +
-                    '<td>' + line['version'] + '</td>' +
-                    '</tr>';
-                count++;
-            }
-
-            $('#tab-bouncers table tbody').html(content);
-            $("#bouncersTable").fancyTable({
-                sortColumn: 0,
-                pagination: count > perPage,
-                searchable: true,
-                sortable: true,
-                perPage: perPage,
-                globalSearch: true
-            });
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
         };
-        _initTab('#tab-bouncers ', action, dataCallback);
+        _initTab(id, action, dataCallback);
     }
 
     function _initAlerts() {
         const action = 'alerts-list';
+        const id = "#tab-alerts";
         const dataCallback = function (data) {
             const rows = [];
-            let count = 0;
-            const perPage = 10;
             data.map(function (row) {
                 rows.push({
                     id: row.id,
@@ -339,42 +308,16 @@ const CrowdSec = (function () {
                     created_at: row.created_at
                 });
             });
-            let content = '';
-            if (!rows.length) {
-                content = default_result;
-            }
-            for (const line of rows) {
-                content += '<tr>' +
-                    '<td>' + line['id'] + '</td>' +
-                    '<td>' + line['value'] + '</td>' +
-                    '<td>' + line['reason'] + '</td>' +
-                    '<td>' + line['country'] + '</td>' +
-                    '<td>' + line['as'] + '</td>' +
-                    '<td>' + line['decisions'] + '</td>' +
-                    '<td>' + line['created_at'] + '</td>' +
-                    '</tr>';
-                count++;
-            }
-
-            $('#tab-alerts table tbody').html(content);
-            $("#alertsTable").fancyTable({
-                sortColumn: 0,
-                pagination: count > perPage,
-                searchable: true,
-                sortable: true,
-                perPage: perPage,
-                globalSearch: true
-            });
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
         };
-        _initTab('#tab-alerts ', action, dataCallback);
+        _initTab(id, action, dataCallback);
     }
 
     function _initDecisions() {
         const action = 'decisions-list';
+        const id = "#tab-decisions";
         const dataCallback = function (data) {
             const rows = [];
-            const perPage = 500;
-            let count = 0;
             data.map(function (row) {
                 row.decisions.map(function (decision) {
                     // ignore deleted decisions
@@ -383,7 +326,7 @@ const CrowdSec = (function () {
                     }
                     rows.push({
                         // search will break on empty values when using .append(). so we use spaces
-                        delete: _getDeleteButton(decision),
+                        delete: '',
                         id: decision.id,
                         source: decision.origin || ' ',
                         scope_value: decision.scope + (decision.value ? (':' + decision.value) : ''),
@@ -398,39 +341,9 @@ const CrowdSec = (function () {
                     });
                 });
             });
-            let content = '';
-            if (!rows.length) {
-                content = default_result;
-            }
-            for (const line of rows) {
-                content += '<tr class="row-decision-' + line['id'] + '">' +
-                    '<td>' + line['delete'] + '</td>' +
-                    '<td>' + line['id'] + '</td>' +
-                    '<td>' + line['source'] + '</td>' +
-                    '<td>' + line['scope_value'] + '</td>' +
-                    '<td>' + line['reason'] + '</td>' +
-                    '<td>' + line['action'] + '</td>' +
-                    '<td>' + line['country'] + '</td>' +
-                    '<td>' + line['as'] + '</td>' +
-                    '<td>' + line['events_count'] + '</td>' +
-                    '<td>' + line['expiration'] + '</td>' +
-                    '<td>' + line['alert_id'] + '</td>' +
-                    '</tr>';
-                count++;
-            }
-
-            $('#tab-decisions table tbody').html(content);
-            $("#decisionsTable").fancyTable({
-                sortColumn: 0,
-                pagination: count > perPage,
-                searchable: true,
-                sortable: true,
-                perPage: perPage,
-                globalSearch: true
-            });
-
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
         };
-        _initTab('#tab-decisions', action, dataCallback);
+        _initTab(id, action, dataCallback);
     }
 
     function deleteDecision(decisionId) {
@@ -449,17 +362,49 @@ const CrowdSec = (function () {
                 dataType: 'json',
                 success: function (result) {
                     if (result && result.message === 'OK') {
-                        $('#decisionsTable .row-decision-' + decisionId).remove();
+                        $('#tab-decisions table').bootgrid('remove', [decisionId]);
                     }
                 }
             });
         });
     }
 
+    function _handleHash(hash) {
+        switch (hash) {
+            case '#tab-alerts':
+                _initAlerts();
+                break;
+            case '#tab-bouncers':
+                _initBouncers();
+                break;
+            case '#tab-collections':
+                _initCollections();
+                break;
+            case '#tab-decisions':
+                _initDecisions();
+                break;
+            case '#tab-machines':
+                _initMachines();
+                break;
+            case '#tab-parsers':
+                _initParsers();
+                break;
+            case '#tab-postoverflows':
+                _initPostoverflows();
+                break;
+            case '#tab-scenarios':
+                _initScenarios();
+                break;
+            default:
+                _initMachines();
+
+        }
+    }
+
+
+
     function init() {
         // Machines tab is the first to be visible
-        _initMachines();
-
         $("#tabs").tabs({
             activate: function (event, ui) {
                 switch (ui.newPanel[0].id) {
@@ -491,6 +436,16 @@ const CrowdSec = (function () {
                         break
                 }
             }
+        });
+        // activate a tab from the hash, if it exists
+        _handleHash(window.location.hash);
+
+        $(window).on('hashchange', function (e) {
+            _handleHash(window.location.hash);
+        });
+
+        $(window).on('popstate', function(event) {
+            _handleHash(window.location.hash);
         });
     }
 

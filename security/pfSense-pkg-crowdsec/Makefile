@@ -29,6 +29,7 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/pkg
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/crowdsec/js
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/crowdsec/css
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/crowdsec/status
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 	${MKDIR} ${STAGEDIR}${DATADIR}
@@ -42,10 +43,16 @@ do-install:
 			${STAGEDIR}${PREFIX}/www
 	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/status/api.php \
           			${STAGEDIR}${PREFIX}/www/crowdsec/status
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/fancyTable.min.js \
-        			${STAGEDIR}${PREFIX}/www/crowdsec/js
 	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/status.js \
            			${STAGEDIR}${PREFIX}/www/crowdsec/js
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/jquery.bootgrid.min.js \
+           			${STAGEDIR}${PREFIX}/www/crowdsec/js
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/jquery.bootgrid.fa.min.js \
+					${STAGEDIR}${PREFIX}/www/crowdsec/js
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/moment.min.js \
+					${STAGEDIR}${PREFIX}/www/crowdsec/js
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/css/jquery.bootgrid.min.css \
+				${STAGEDIR}${PREFIX}/www/crowdsec/css
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/crowdsec.inc \
 			${STAGEDIR}${PREFIX}/www/shortcuts
 	${INSTALL_DATA} ${FILESDIR}/etc/inc/priv/crowdsec.priv.inc \

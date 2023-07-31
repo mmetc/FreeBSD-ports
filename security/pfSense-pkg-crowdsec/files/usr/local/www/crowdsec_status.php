@@ -37,20 +37,37 @@ $tab_array[] = array("Settings", false, "/pkg_edit.php?xml=crowdsec.xml&amp;id=0
 $tab_array[] = array("Status", true, "/crowdsec_status.php");
 display_top_tabs($tab_array);
 
+$css = <<<EOT
+<style type="text/css">
+.search .fa-search {
+  font-weight: bolder !important;
+}
+.no-results {
+ display:none !important;
+}
 
+.loading {
+text-align:center;
+padding: 4rem;
+}
+</style>
+EOT;
 
 
 $content = <<<EOT
-  <script src="/crowdsec/js/fancyTable.min.js" defer></script>
+  <link rel="stylesheet" href="/crowdsec/css/jquery.bootgrid.min.css">
+  <script src="/crowdsec/js/jquery.bootgrid.min.js" defer></script>
+  <script src="/crowdsec/js/jquery.bootgrid.fa.min.js" defer></script>
+  <script src="/crowdsec/js/moment.min.js" defer></script>
   <script src="/crowdsec/js/status.js" defer></script>
     <script>
-    
     events.push(function() {
          CrowdSec.init();
+         $('#tabs').show();
     });
     </script>
 
-<div id="tabs">
+<div id="tabs" style="display:none;">
   <ul>
     <li><a href="#tab-machines">Machines</a></li>
     <li><a href="#tab-bouncers">Bouncers</a></li>
@@ -61,133 +78,166 @@ $content = <<<EOT
     <li><a href="#tab-alerts">Alerts</a></li>
     <li><a href="#tab-decisions">Decisions</a></li>
   </ul>
+  <div class="loading"><i class="fa fa-spinner fa-spin"></i>Loading, please wait..</div>
   <div id="tab-machines">
-    <table id="machinesTable" class="table table-striped crowdsecTable">
-        <thead>
-            <tr>
-              <th>Name</th>
-              <th>IP Address</th>
-              <th data-sortas="datetime">Last Update</th>
-              <th>Validated?</th>
-              <th>Version</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <table class="table table-condensed table-hover table-striped crowdsecTable">
+            <thead>
+                <tr>
+                  <th data-column-id="name">Name</th>
+                  <th data-column-id="ip_address">IP Address</th>
+                  <th data-column-id="last_update" data-formatter="datetime">Last Update</th>
+                  <th data-column-id="validated" data-formatter="yesno" data-searchable="false">Validated?</th>
+                  <th data-column-id="version">Version</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr>
+                </tr>
+            </tfoot>
+        </table>
   </div>
   <div id="tab-bouncers">
-    <table id="bouncersTable" class="table table-striped crowdsecTable">
+   <table class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
-              <th>Name</th>
-              <th>IP Address</th>
-              <th>Valid</th>
-              <th data-sortas="datetime">Last API Pull</th>
-              <th>Type</th>
-              <th>Version</th>
+              <th data-column-id="name">Name</th>
+              <th data-column-id="ip_address">IP Address</th>
+              <th data-column-id="valid" data-formatter="yesno" data-searchable="false">Valid</th>
+              <th data-column-id="last_pull" data-formatter="datetime">Last API Pull</th>
+              <th data-column-id="type">Type</th>
+              <th data-column-id="version">Version</th>
             </tr>
         </thead>
         <tbody>
-        </tbody>
+            </tbody>
+        <tfoot>
+            <tr>
+            </tr>
+        </tfoot>
     </table>
   </div>
   <div id="tab-collections">
-    <table id="collectionsTable" class="table table-striped crowdsecTable">
+    <table class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Version</th>
-              <th>Local Path</th>
+              <th data-column-id="name">Name</th>
+              <th data-column-id="status">Status</th>
+              <th data-column-id="local_version">Version</th>
+              <th data-column-id="local_path">Local Path</th>
             </tr>
         </thead>
         <tbody>
-        </tbody>
+            </tbody>
+        <tfoot>
+            <tr>
+            </tr>
+        </tfoot>
     </table>
   </div>
   <div id="tab-scenarios">
-      <table id="scenariosTable" class="table table-striped crowdsecTable">
+     <table class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Version</th>
-              <th>Path</th>
-              <th>Description</th>
+              <th data-column-id="name">Name</th>
+              <th data-column-id="status">Status</th>
+              <th data-column-id="local_version">Version</th>
+              <th data-column-id="local_path">Path</th>
+              <th data-column-id="description">Description</th>
             </tr>
         </thead>
         <tbody>
-        </tbody>
-      </table>
+            </tbody>
+        <tfoot>
+            <tr>
+            </tr>
+        </tfoot>
+    </table>
   </div>
   <div id="tab-parsers">
-      <table id="parsersTable" class="table table-striped crowdsecTable">
+      <table class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Version</th>
-              <th>Path</th>
-              <th>Description</th>
+              <th data-column-id="name">Name</th>
+              <th data-column-id="status">Status</th>
+              <th data-column-id="local_version">Version</th>
+              <th data-column-id="local_path">Local Path</th>
+              <th data-column-id="description">Description</th>
             </tr>
         </thead>
         <tbody>
-        </tbody>
-      </table>
+            </tbody>
+        <tfoot>
+            <tr>
+            </tr>
+        </tfoot>
+    </table>
   </div>
   <div id="tab-postoverflows">
-      <table id="postoverflowsTable" class="table table-striped crowdsecTable">
-        <thead>
-            <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Version</th>
-              <th>Path</th>
-              <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
+      <table class="table table-condensed table-hover table-striped crowdsecTable">
+            <thead>
+                <tr>
+                  <th data-column-id="name">Name</th>
+                  <th data-column-id="status">Status</th>
+                  <th data-column-id="local_version">Version</th>
+                  <th data-column-id="local_path">Local Path</th>
+                  <th data-column-id="description">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr>
+                </tr>
+            </tfoot>
+        </table>
   </div>
   <div id="tab-alerts">
-    <table id="alertsTable" class="table table-striped crowdsecTable">
+    <table class="table table-condensed table-hover table-striped crowdsecTable">
         <thead>
             <tr>
-              <th data-sortas="numeric">ID</th>
-              <th>Value</th>
-              <th>Reason</th>
-              <th>Country</th>
-              <th>AS</th>
-              <th>Decisions</th>
-              <th data-sortas="datetime">Created At</th>
+              <th data-column-id="id" data-type="numeric">ID</th>
+              <th data-column-id="value">Value</th>
+              <th data-column-id="reason">Reason</th>
+              <th data-column-id="country">Country</th>
+              <th data-column-id="as">AS</th>
+              <th data-column-id="decisions">Decisions</th>
+              <th data-column-id="created_at" data-formatter="datetime">Created At</th>
             </tr>
         </thead>
-        <tbody>
+       <tbody>
         </tbody>
+        <tfoot>
+            <tr>
+            </tr>
+        </tfoot>
     </table>
   </div>
   <div id="tab-decisions">
-    <table id="decisionsTable" class="table table-striped crowdsecTable">
-        <thead>
-            <tr>
-              <th></th>
-              <th data-sortas="numeric">ID</th>
-              <th>Source</th>
-              <th>Scope:Value</th>
-              <th>Reason</th>
-              <th>Action</th>
-              <th>Country</th>
-              <th>AS</th>
-              <th>Events</th>
-              <th>Expiration</th>
-              <th data-sortas="numeric">Alert&nbsp;ID</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <table class="table table-condensed table-hover table-striped crowdsecTable">
+            <thead>
+                <tr>
+                  <th data-column-id="delete" data-formatter="delete" data-visible-in-selection="false"></th>
+                  <th data-column-id="id" data-identifier="true" data-type="numeric">ID</th>
+                  <th data-column-id="source">Source</th>
+                  <th data-column-id="scope_value">Scope:Value</th>
+                  <th data-column-id="reason">Reason</th>
+                  <th data-column-id="action">Action</th>
+                  <th data-column-id="country">Country</th>
+                  <th data-column-id="as">AS</th>
+                  <th data-column-id="events_count" data-type="numeric">Events</th>
+                  <th data-column-id="expiration" data-formatter="duration">Expiration</th>
+                  <th data-column-id="alert_id" data-type="numeric">Alert&nbsp;ID</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr>
+                </tr>
+            </tfoot>
+        </table>
   </div>
 </div>
 <!-- Modal popup to confirm decision deletion -->
@@ -215,6 +265,8 @@ EOT;
 
 
 echo $content;
+
+echo $css;
 
 
 include("foot.inc");
