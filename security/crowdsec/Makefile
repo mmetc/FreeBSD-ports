@@ -1,7 +1,7 @@
 PORTNAME=	crowdsec
 DISTVERSIONPREFIX=	v
 DISTVERSION=	1.5.3-rc4
-# PORTREVISION=	0
+PORTREVISION=	1
 CATEGORIES=	security
 MASTER_SITES=	https://github.com/${GH_ACCOUNT}/${GH_PROJECT}/releases/download/${DISTVERSIONFULL}/:vendor
 DISTFILES=	vendor.tgz:vendor
@@ -31,7 +31,8 @@ MAKE_ARGS=	BUILD_VERSION="${DISTVERSIONPREFIX}${DISTVERSION}-freebsd" \
 		BUILD_TAG="${GH_TAGNAME}" \
 		BUILD_VENDOR_FLAGS="-mod=vendor -modcacherw" \
 		DEFAULT_CONFIGDIR="${PREFIX}/etc/crowdsec" \
-		DEFAULT_DATADIR="/var/db/crowdsec/data"
+		DEFAULT_DATADIR="/var/db/crowdsec/data" \
+		BUILD_STATIC=1
 
 ALL_TARGET=	build
 
