@@ -479,6 +479,34 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
+    function _initMetricsLapi() {
+        const action = 'metrics-lapi-list';
+        const id = "#tab-metrics-lapi";
+        const dataCallback = function (data) {
+            const rows = [];
+            if(data.lapi){
+                const infos = Object.entries(data.lapi);
+                infos.map(function (info) {
+                    if(info.length === 2){
+                        const routes = Object.entries(info[1]);
+                        routes.map(function (route) {
+                            if (route.length === 2) {
+                                rows.push({
+                                    route: info[0] || ' ',
+                                    method: route[0],
+                                    hits: route[1]
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
+        };
+        _initTab(id, action, dataCallback);
+    }
+
     function deleteDecision(decisionId) {
         const $modal = $('#remove-decision-modal');
         const action = 'status-decision-delete';
@@ -546,6 +574,7 @@ const CrowdSec = (function () {
                 _initMetricsParser();
                 break;
             case '#tab-metrics-lapi':
+                _initMetricsLapi();
                 break;
             case '#tab-metrics-lapi-machines':
                 _initMetricsLapiMachines();
@@ -625,6 +654,7 @@ const CrowdSec = (function () {
                         _initMetricsParser();
                         break;
                     case 'tab-metrics-lapi':
+                        _initMetricsLapi();
                         break;
                     case 'tab-metrics-lapi-machines':
                         _initMetricsLapiMachines();

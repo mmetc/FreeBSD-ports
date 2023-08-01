@@ -77,6 +77,7 @@ if ($method === 'DELETE' && isset($_GET['action']) && isset($_GET['decision_id']
         case 'metrics-parser-list':
         case 'metrics-lapi-alerts-list':
         case 'metrics-lapi-machines-list':
+        case 'metrics-lapi-list':
             echo $mockedMetrics;
             // echo shell_exec("/usr/local/bin/cscli metrics -o json");
             break;

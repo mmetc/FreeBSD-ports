@@ -169,7 +169,7 @@ $content = <<<EOT
             <tr>
               <th data-column-id="route">Route</th>
               <th data-column-id="method">Method</th>
-              <th data-column-id="hits">Hits</th>
+              <th data-column-id="hits" data-type="numeric">Hits</th>
             </tr>
         </thead>
         <tbody>
@@ -187,7 +187,7 @@ $content = <<<EOT
               <th data-column-id="machine">Machine</th>
               <th data-column-id="route">Route</th>
               <th data-column-id="method">Method</th>
-              <th data-column-id="hits">Hits</th>
+              <th data-column-id="hits" data-type="numeric">Hits</th>
             </tr>
         </thead>
         <tbody>
