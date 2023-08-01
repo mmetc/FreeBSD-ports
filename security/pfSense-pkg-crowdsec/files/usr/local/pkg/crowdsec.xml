@@ -52,6 +52,10 @@
             <text>Status</text>
             <url>/crowdsec_status.php</url>
         </tab>
+        <tab>
+            <text>Metrics</text>
+            <url>/crowdsec_metric.php</url>
+        </tab>
     </tabs>
     <fields>
         <field>
