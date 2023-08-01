@@ -30,7 +30,7 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/shortcuts
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/crowdsec/js
 	${MKDIR} ${STAGEDIR}${PREFIX}/www/crowdsec/css
-	${MKDIR} ${STAGEDIR}${PREFIX}/www/crowdsec/status
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/crowdsec/endpoint
 	${MKDIR} ${STAGEDIR}/etc/inc/priv
 	${MKDIR} ${STAGEDIR}${DATADIR}
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/rc.conf.d/
@@ -41,9 +41,11 @@ do-install:
     		${STAGEDIR}${PREFIX}/www
 	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec_status.php \
 			${STAGEDIR}${PREFIX}/www
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/status/api.php \
-          			${STAGEDIR}${PREFIX}/www/crowdsec/status
-	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/status.js \
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec_metric.php \
+            			${STAGEDIR}${PREFIX}/www
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/endpoint/api.php \
+          			${STAGEDIR}${PREFIX}/www/crowdsec/endpoint
+	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/crowdsec.js \
            			${STAGEDIR}${PREFIX}/www/crowdsec/js
 	${INSTALL_DATA} -m 0755 ${FILESDIR}${PREFIX}/www/crowdsec/js/jquery.bootgrid.min.js \
            			${STAGEDIR}${PREFIX}/www/crowdsec/js

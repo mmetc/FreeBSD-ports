@@ -6,7 +6,7 @@
 const CrowdSec = (function () {
     'use strict';
 
-    const api_url = '/crowdsec/status/api.php';
+    const api_url = '/crowdsec/endpoint/api.php';
     const _refreshTemplate = '<button class="btn btn-default" type="button" title="Refresh"><span class="icon fa fa-refresh"></span></button>';
 
     const _dataFormatters = {
@@ -107,9 +107,10 @@ const CrowdSec = (function () {
             success: dataCallback,
             complete: function() {
                 $( ".loading" ).hide();
+                _updateFreshness(selector, moment());
             }
         })
-        _updateFreshness(selector, moment());
+
     }
 
     function _parseDuration (duration) {
@@ -178,9 +179,9 @@ const CrowdSec = (function () {
         });
     }
 
-    function _initMachines() {
-        const action = 'machines-list';
-        const id = '#tab-machines';
+    function _initStatusMachines() {
+        const action = 'status-machines-list';
+        const id = '#tab-status-machines';
         const dataCallback = function (data) {
             const rows = [];
             data.map(function (row) {
@@ -197,9 +198,9 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
-    function _initCollections() {
-        const action = 'collections-list';
-        const id = "#tab-collections";
+    function _initStatusCollections() {
+        const action = 'status-collections-list';
+        const id = "#tab-status-collections";
         const dataCallback = function (data) {
             const rows = [];
             data.collections.map(function (row) {
@@ -215,9 +216,9 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
-    function _initScenarios() {
-        const action = 'scenarios-list';
-        const id = "#tab-scenarios";
+    function _initStatusScenarios() {
+        const action = 'status-scenarios-list';
+        const id = "#tab-status-scenarios";
         const dataCallback = function (data) {
             const rows = [];
             data.scenarios.map(function (row) {
@@ -234,9 +235,9 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
-    function _initParsers() {
-        const action = 'parsers-list';
-        const id = "#tab-parsers";
+    function _initStatusParsers() {
+        const action = 'status-parsers-list';
+        const id = "#tab-status-parsers";
         const dataCallback = function (data) {
             const rows = [];
             data.parsers.map(function (row) {
@@ -253,9 +254,9 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
-    function _initPostoverflows() {
-        const action = 'postoverflows-list';
-        const id = "#tab-postoverflows";
+    function _initStatusPostoverflows() {
+        const action = 'status-postoverflows-list';
+        const id = "#tab-status-postoverflows";
         const dataCallback = function (data) {
             const rows = [];
             data.postoverflows.map(function (row) {
@@ -272,9 +273,9 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
-    function _initBouncers() {
-        const action = 'bouncers-list';
-        const id = "#tab-bouncers";
+    function _initStatusBouncers() {
+        const action = 'status-bouncers-list';
+        const id = "#tab-status-bouncers";
         const dataCallback = function (data) {
             const rows = [];
             data.map(function (row) {
@@ -293,9 +294,9 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
-    function _initAlerts() {
-        const action = 'alerts-list';
-        const id = "#tab-alerts";
+    function _initStatusAlerts() {
+        const action = 'status-alerts-list';
+        const id = "#tab-status-alerts";
         const dataCallback = function (data) {
             const rows = [];
             data.map(function (row) {
@@ -314,9 +315,9 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
-    function _initDecisions() {
-        const action = 'decisions-list';
-        const id = "#tab-decisions";
+    function _initStatusDecisions() {
+        const action = 'status-decisions-list';
+        const id = "#tab-status-decisions";
         const dataCallback = function (data) {
             const rows = [];
             data.map(function (row) {
@@ -347,9 +348,140 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
+    function _initMetricsAcquisition() {
+        const action = 'metrics-acquisition-list';
+        const id = "#tab-metrics-acquisition";
+        const dataCallback = function (data) {
+            const rows = [];
+            if(data.acquisition){
+                const acquisition = Object.entries(data.acquisition);
+                acquisition.map(function (acquisition) {
+                    if(acquisition.length === 2){
+                        rows.push({
+                            // search will break on empty values when using .append(). so we use spaces
+                            source: acquisition[0] || ' ',
+                            read: acquisition[1].reads || ' ',
+                            parsed: acquisition[1].parsed || ' ',
+                            unparsed: acquisition[1].unparsed || ' ',
+                            poured: acquisition[1].pour || ' ',
+                        });
+                    }
+                });
+            }
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
+        };
+        _initTab(id, action, dataCallback);
+    }
+
+    function _initMetricsBucket() {
+        const action = 'metrics-bucket-list';
+        const id = "#tab-metrics-bucket";
+        const dataCallback = function (data) {
+            const rows = [];
+            if(data.buckets){
+                const buckets = Object.entries(data.buckets);
+                buckets.map(function (bucket) {
+                    if(bucket.length === 2){
+                        rows.push({
+                            bucket: bucket[0] || ' ',
+                            current: bucket[1].curr_count || ' ',
+                            overflows: bucket[1].overflow || ' ',
+                            instantiated: bucket[1].instantiation || ' ',
+                            poured: bucket[1].pour || ' ',
+                            underflows: bucket[1].underflow || ' ',
+                        });
+                    }
+                });
+            }
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
+        };
+        _initTab(id, action, dataCallback);
+    }
+
+    function _initMetricsParser() {
+        const action = 'metrics-parser-list';
+        const id = "#tab-metrics-parser";
+        const dataCallback = function (data) {
+            const rows = [];
+            if(data.parsers){
+                const parsers = Object.entries(data.parsers);
+                parsers.map(function (parser) {
+                    if(parser.length === 2){
+                        rows.push({
+                            parsers: parser[0] || ' ',
+                            hits: parser[1].hits || ' ',
+                            parsed: parser[1].parsed || ' ',
+                            unparsed: parser[1].unparsed || ' '
+                        });
+                    }
+                });
+            }
+
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
+        };
+        _initTab(id, action, dataCallback);
+    }
+
+    function _initMetricsLapiAlerts() {
+        const action = 'metrics-lapi-alerts-list';
+        const id = "#tab-metrics-lapi-alerts";
+        const dataCallback = function (data) {
+            const rows = [];
+            if(data.alerts) {
+                const alerts = Object.entries(data.alerts);
+                alerts.map(function (alert) {
+                    if (alert.length === 2) {
+                        rows.push({
+                            reason: alert[0] || ' ',
+                            count: alert[1] || ' '
+                        });
+                    }
+                });
+            }
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
+        };
+        _initTab(id, action, dataCallback);
+    }
+
+    function _initMetricsLapiMachines() {
+        const action = 'metrics-lapi-machines-list';
+        const id = "#tab-metrics-lapi-machines";
+        const dataCallback = function (data) {
+            const rows = [];
+            if(data.lapi_machine){
+                const machines = Object.entries(data.lapi_machine);
+                machines.map(function (machine) {
+                     if(machine.length === 2){
+                         const routes = Object.entries(machine[1]);
+                         routes.map(function (route) {
+                                const methods = Object.values(route);
+                                if( methods.length === 2 ){
+                                    const methodTypes = Object.entries(methods[1]);
+                                    methodTypes.map(function (type) {
+                                        if (type.length === 2) {
+                                            rows.push({
+                                                machine: machine[0] || ' ',
+                                                route: route[0] || ' ',
+                                                method: type[0],
+                                                hits: type[1]
+                                            });
+                                        }
+                                    });
+
+                                }
+                         });
+                     }
+                 });
+            }
+
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
+        };
+        _initTab(id, action, dataCallback);
+    }
+
     function deleteDecision(decisionId) {
         const $modal = $('#remove-decision-modal');
-        const action = 'decision-delete';
+        const action = 'status-decision-delete';
 
         $modal.find('.modal-title').text('Delete decision #' + decisionId);
         $modal.find('.modal-body').text('Are you sure?');
@@ -363,95 +495,168 @@ const CrowdSec = (function () {
                 dataType: 'json',
                 success: function (result) {
                     if (result && result.message === 'OK') {
-                        $('#tab-decisions table').bootgrid('remove', [decisionId]);
+                        $('#tab-status-decisions table').bootgrid('remove', [decisionId]);
                     }
                 }
             });
         });
     }
 
-    function _handleHash(hash) {
+    function _handleStatusHash(hash) {
         switch (hash) {
-            case '#tab-alerts':
-                _initAlerts();
+            case '#tab-status-alerts':
+                _initStatusAlerts();
                 break;
-            case '#tab-bouncers':
-                _initBouncers();
+            case '#tab-status-bouncers':
+                _initStatusBouncers();
                 break;
-            case '#tab-collections':
-                _initCollections();
+            case '#tab-status-collections':
+                _initStatusCollections();
                 break;
-            case '#tab-decisions':
-                _initDecisions();
+            case '#tab-status-decisions':
+                _initStatusDecisions();
                 break;
-            case '#tab-machines':
-                _initMachines();
+            case '#tab-status-machines':
+                _initStatusMachines();
                 break;
-            case '#tab-parsers':
-                _initParsers();
+            case '#tab-status-parsers':
+                _initStatusParsers();
                 break;
-            case '#tab-postoverflows':
-                _initPostoverflows();
+            case '#tab-status-postoverflows':
+                _initStatusPostoverflows();
                 break;
-            case '#tab-scenarios':
-                _initScenarios();
+            case '#tab-status-scenarios':
+                _initStatusScenarios();
                 break;
             default:
-                _initMachines();
+                _initStatusMachines();
 
         }
     }
 
+    function _handleMetricsHash(hash) {
+        switch (hash) {
+            case '#tab-metrics-acquisition':
+                _initMetricsAcquisition();
+                break;
+            case '#tab-metrics-bucket':
+                _initMetricsBucket();
+                break;
+            case '#tab-metrics-parser':
+                _initMetricsParser();
+                break;
+            case '#tab-metrics-lapi':
+                break;
+            case '#tab-metrics-lapi-machines':
+                _initMetricsLapiMachines();
+                break;
+            case '#tab-metrics-lapi-bouncers':
+                break;
+            case '#tab-metrics-lapi-decisions':
+                break;
+            case '#tab-metrics-lapi-alerts':
+                _initMetricsLapiAlerts();
+                break;
+            default:
+                _initMetricsAcquisition();
 
+        }
+    }
 
-    function init() {
+    function initStatus() {
         // Machines tab is the first to be visible
         $("#tabs").tabs({
             activate: function (event, ui) {
                 switch (ui.newPanel[0].id) {
-                    case 'tab-alerts':
-                        _initAlerts();
+                    case 'tab-status-alerts':
+                        _initStatusAlerts();
                         break;
-                    case 'tab-bouncers':
-                        _initBouncers();
+                    case 'tab-status-bouncers':
+                        _initStatusBouncers();
                         break;
-                    case 'tab-collections':
-                        _initCollections();
+                    case 'tab-status-collections':
+                        _initStatusCollections();
                         break;
-                    case 'tab-decisions':
-                        _initDecisions();
+                    case 'tab-status-decisions':
+                        _initStatusDecisions();
                         break;
-                    case 'tab-machines':
-                        _initMachines();
+                    case 'tab-status-machines':
+                        _initStatusMachines();
                         break;
-                    case 'tab-parsers':
-                        _initParsers();
+                    case 'tab-status-parsers':
+                        _initStatusParsers();
                         break;
-                    case 'tab-postoverflows':
-                        _initPostoverflows();
+                    case 'tab-status-postoverflows':
+                        _initStatusPostoverflows();
                         break;
-                    case 'tab-scenarios':
-                        _initScenarios();
+                    case 'tab-status-scenarios':
+                        _initStatusScenarios();
                         break;
                     default:
+                        _initStatusMachines();
                         break
                 }
             }
         });
         // activate a tab from the hash, if it exists
-        _handleHash(window.location.hash);
+        _handleStatusHash(window.location.hash);
 
         $(window).on('hashchange', function (e) {
-            _handleHash(window.location.hash);
+            _handleStatusHash(window.location.hash);
         });
 
         $(window).on('popstate', function(event) {
-            _handleHash(window.location.hash);
+            _handleStatusHash(window.location.hash);
+        });
+    }
+
+    function initMetrics() {
+        // Acquisition tab is the first to be visible
+        $("#tabs").tabs({
+            activate: function (event, ui) {
+                switch (ui.newPanel[0].id) {
+                    case 'tab-metrics-acquisition':
+                        _initMetricsAcquisition();
+                        break;
+                    case 'tab-metrics-bucket':
+                        _initMetricsBucket();
+                        break;
+                    case 'tab-metrics-parser':
+                        _initMetricsParser();
+                        break;
+                    case 'tab-metrics-lapi':
+                        break;
+                    case 'tab-metrics-lapi-machines':
+                        _initMetricsLapiMachines();
+                        break;
+                    case 'tab-metrics-lapi-bouncers':
+                        break;
+                    case 'tab-metrics-lapi-decisions':
+                        break;
+                    case 'tab-metrics-lapi-alerts':
+                        _initMetricsLapiAlerts();
+                        break;
+                    default:
+                        _initMetricsAcquisition();
+                        break
+                }
+            }
+        });
+        // activate a tab from the hash, if it exists
+        _handleMetricsHash(window.location.hash);
+
+        $(window).on('hashchange', function (e) {
+            _handleMetricsHash(window.location.hash);
+        });
+
+        $(window).on('popstate', function(event) {
+            _handleMetricsHash(window.location.hash);
         });
     }
 
     return {
         deleteDecision: deleteDecision,
-        init: init
+        initStatus: initStatus,
+        initMetrics: initMetrics
     };
 }());
