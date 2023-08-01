@@ -479,6 +479,43 @@ const CrowdSec = (function () {
         _initTab(id, action, dataCallback);
     }
 
+    function _initMetricsLapiBouncers() {
+        const action = 'metrics-lapi-bouncers-list';
+        const id = "#tab-metrics-lapi-bouncers";
+        const dataCallback = function (data) {
+            const rows = [];
+            if(data.lapi_bouncer){
+                const bouncers = Object.entries(data.lapi_bouncer);
+                bouncers.map(function (bouncer) {
+                    if(bouncer.length === 2){
+                        const routes = Object.entries(bouncer[1]);
+                        routes.map(function (route) {
+                            const methods = Object.values(route);
+                            if( methods.length === 2 ){
+                                const methodTypes = Object.entries(methods[1]);
+                                methodTypes.map(function (type) {
+                                    if (type.length === 2) {
+                                        rows.push({
+                                            bouncer: bouncer[0] || ' ',
+                                            route: route[0] || ' ',
+                                            method: type[0],
+                                            hits: type[1]
+                                        });
+                                    }
+                                });
+
+                            }
+                        });
+                    }
+                });
+            }
+
+            $(id + ' table').bootgrid('clear').bootgrid('append', rows);
+        };
+        _initTab(id, action, dataCallback);
+    }
+
+
     function _initMetricsLapi() {
         const action = 'metrics-lapi-list';
         const id = "#tab-metrics-lapi";
@@ -580,6 +617,7 @@ const CrowdSec = (function () {
                 _initMetricsLapiMachines();
                 break;
             case '#tab-metrics-lapi-bouncers':
+                _initMetricsLapiBouncers();
                 break;
             case '#tab-metrics-lapi-decisions':
                 break;
@@ -660,6 +698,7 @@ const CrowdSec = (function () {
                         _initMetricsLapiMachines();
                         break;
                     case 'tab-metrics-lapi-bouncers':
+                        _initMetricsLapiBouncers();
                         break;
                     case 'tab-metrics-lapi-decisions':
                         break;
